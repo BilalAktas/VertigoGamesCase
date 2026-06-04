@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03af76e3d0b848cd93e0d7da34eab600, type: 3}
-  m_Name: SO_HardSlice
+  m_Name: SO_EasySlice 1
   m_EditorClassIdentifier: 
   _rewards:
   - {fileID: 11400000, guid: d6092a93022bab84695e7ca0c0c0ac85, type: 2}
@@ -18,21 +18,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a5eab7fef36a3e44e845815812039ff2, type: 2}
   - {fileID: 11400000, guid: d1ad3b612d1dedf46bf65dc7cc396cbc, type: 2}
   - {fileID: 11400000, guid: ba2c92c15e30ac548afd52d4e17a8dcb, type: 2}
-  - {fileID: 11400000, guid: 6c70f0edbc56be54fad1431f9b86d94d, type: 2}
   - {fileID: 11400000, guid: 708052c86be20c844839b7d7b3b1901b, type: 2}
   - {fileID: 11400000, guid: e193b437e8f61794d8fa676659820e39, type: 2}
   - {fileID: 11400000, guid: fdc7e4175e8e6c840affde3cb56885fc, type: 2}
   - {fileID: 11400000, guid: e7c300307eac63f449f2d1094fc117da, type: 2}
-  - {fileID: 11400000, guid: 7ea01dc056a8dee4caacbdc69fa2fca8, type: 2}
-  - {fileID: 11400000, guid: 25741da95e351ad43811bb3d23baa7e0, type: 2}
-  - {fileID: 11400000, guid: fbfa05562aff298468ec426f3165c193, type: 2}
-  - {fileID: 11400000, guid: 5fbf7976893226443b7501d70c183815, type: 2}
-  - {fileID: 11400000, guid: 1afec52ac3f6b834782193175477e9e9, type: 2}
-  - {fileID: 11400000, guid: 29c40ae9124f64f4a92f5b5d7e37b681, type: 2}
-  - {fileID: 11400000, guid: c9fda05b64ea39548b595654e7a33250, type: 2}
-  - {fileID: 11400000, guid: 25741da95e351ad43811bb3d23baa7e0, type: 2}
   - {fileID: 11400000, guid: fbfa05562aff298468ec426f3165c193, type: 2}
   - {fileID: 11400000, guid: 77e8a77c4c168db438c238f6eba43e8e, type: 2}
-  - {fileID: 11400000, guid: 040d0b85f7b14374485a48e3862bc771, type: 2}
+  - {fileID: 11400000, guid: 6c70f0edbc56be54fad1431f9b86d94d, type: 2}
+  - {fileID: 11400000, guid: 6c70f0edbc56be54fad1431f9b86d94d, type: 2}
+  - {fileID: 11400000, guid: 6c70f0edbc56be54fad1431f9b86d94d, type: 2}
   - {fileID: 11400000, guid: 1a7cac9b2fd28d645bbe685fda621b9c, type: 2}
-  _amountMultiplier: 2
+  - {fileID: 11400000, guid: 1a7cac9b2fd28d645bbe685fda621b9c, type: 2}
+  - {fileID: 11400000, guid: 1a7cac9b2fd28d645bbe685fda621b9c, type: 2}
+  _amountMultiplier: 0.25

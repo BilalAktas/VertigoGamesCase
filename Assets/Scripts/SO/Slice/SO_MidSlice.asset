@@ -31,3 +31,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c9fda05b64ea39548b595654e7a33250, type: 2}
   - {fileID: 11400000, guid: 25741da95e351ad43811bb3d23baa7e0, type: 2}
   - {fileID: 11400000, guid: fbfa05562aff298468ec426f3165c193, type: 2}
+  _amountMultiplier: 0.5

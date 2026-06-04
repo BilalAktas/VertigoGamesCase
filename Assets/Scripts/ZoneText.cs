@@ -14,11 +14,13 @@ namespace Core
             GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.GetSiblingIndex() * 70, 0);
             SetText();
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
+            EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
+            EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
 
         private void SetText()
@@ -28,6 +30,8 @@ namespace Core
             _text.color = _level % 5 == 0 ?  Color.green : Color.white;
             OnZoneUIAnimationEnded(new OnZoneUIAnimationEndedEvent());
         }
+        
+        private void OnClaimEnded(OnClaimEndedEvent data) => SetText();
 
         private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data)
         {

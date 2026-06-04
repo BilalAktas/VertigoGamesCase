@@ -27,16 +27,22 @@ namespace Core
             _spinButton.onClick.AddListener(Spin);
             
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
+            EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
+            EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
 
         private void OnDestroy()
         {
             _spinButton.onClick.RemoveAllListeners();
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
+            EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
+            EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
         
         private void Spin()
         {
+            EventBus.Raise(new OnSpinStartedEvent());
+            
             _spinButton.transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
             {
                 _spinButton.gameObject.SetActive(false);
@@ -94,14 +100,13 @@ namespace Core
 
             sequence.OnComplete(() =>
             {
-  
                 ShowReward(rewardIndex);
             });
         }
 
         private void ShowReward(int rewardIndex)
         {
-            EventBus.Raise<OnWheelSpinEndedEvent>(new OnWheelSpinEndedEvent()
+            EventBus.Raise(new OnWheelSpinEndedEvent()
             {
                 Index = rewardIndex
             });
@@ -127,6 +132,7 @@ namespace Core
         private void ResetWheel(OnZoneUIAnimationEndedEvent data)
         {
             _spinButton.gameObject.SetActive(true);
+            _spinButton.interactable = true;
             _spinButton.transform.localScale = Vector2.one;
             transform.rotation = Quaternion.identity;
 
@@ -135,5 +141,9 @@ namespace Core
                 SliceData = GetSliceData()
             });
         }
+
+        private void OnClaimStarted(OnClaimStartedEvent data) => _spinButton.interactable = false;
+
+        private void OnClaimEnded(OnClaimEndedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
     }
 }

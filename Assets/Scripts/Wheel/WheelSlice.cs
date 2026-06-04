@@ -11,6 +11,7 @@ namespace Core
         private Image _sliceImage;
         private TextMeshProUGUI _amountText;
         private RectTransform _rectTransform;
+        private int _amount;
         
         
         private void Start()
@@ -35,6 +36,10 @@ namespace Core
             RewardData = data.SliceData.Rewards[Random.Range(0, data.SliceData.Rewards.Length)];
             _sliceImage.sprite = RewardData.Sprite;
             transform.localScale = Vector2.one;
+            _amount = RewardData.RewardType != RewardType.Money ? 1
+                : (int)Random.Range(100 * LevelManager.GetLevel(),
+                    (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
+            _amountText.text = $"x{_amount}";
             SetColorAlpha(1f);
         }
 
@@ -62,9 +67,10 @@ namespace Core
             {
                 _rectTransform.anchoredPosition = startPos;
                 transform.localScale = Vector2.zero;
-                EventBus.Raise<OnShowRewardEvent>(new OnShowRewardEvent()
+                EventBus.Raise(new OnShowRewardEvent()
                 {
-                    RewardData = RewardData
+                    RewardData = RewardData,
+                    Amount = _amount
                 });
             });
         }

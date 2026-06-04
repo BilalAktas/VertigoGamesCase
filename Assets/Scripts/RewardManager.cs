@@ -23,11 +23,13 @@ namespace Core
         {
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
+            EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnShowRewardEvent>(Show);
+            EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
 
         private void Show(OnShowRewardEvent data)
@@ -76,7 +78,7 @@ namespace Core
                             var tRect = item.GetComponent<RectTransform>();
                             RewardImageAnimation(movingRect, tRect, () =>
                             {
-                                item.Add(1);
+                                item.Add(data.Amount);
                             });
                         });
                         
@@ -117,7 +119,7 @@ namespace Core
                 {
                     RewardImageAnimation(movingRect, targetRect, () =>
                     {
-                        clonedItem.Set(data.RewardData, 1);
+                        clonedItem.Set(data.RewardData, data.Amount);
                     });
                 });
                 
@@ -142,9 +144,21 @@ namespace Core
             {
                 _rewardImage.transform.localScale = Vector2.zero;
                 movingRect.anchoredPosition = Vector2.zero;
-                EventBus.Raise<OnRewardActionEndedEvent>(new OnRewardActionEndedEvent());
+                EventBus.Raise(new OnRewardActionEndedEvent());
                 afterAction?.Invoke();
             });
+        }
+
+        private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
+
+        private void OnReset()
+        {
+            _currentItemIndexes.Clear();
+            foreach (var item in _rewardItems.ToArray())
+                Destroy(item.gameObject);
+            
+            _rewardItems.Clear();
+            _rewardContentUI.anchoredPosition = Vector2.zero;
         }
     }
 }
