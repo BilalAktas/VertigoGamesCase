@@ -954,6 +954,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8e8c75679d073ea4e834799bd1e75dbe, type: 2}
   - {fileID: 11400000, guid: 400ebe11f2eb8f74d8857ba9d6463b44, type: 2}
   - {fileID: 11400000, guid: 847e68ef4d9deb84a898d61a30b5854e, type: 2}
+  - {fileID: 11400000, guid: 0a301b9b5bfc5d943b8ebf629ceca53f, type: 2}
   _spinButton: {fileID: 781280464}
   _spinDuration: 10
   _indicatorAnim: {fileID: 314480181}

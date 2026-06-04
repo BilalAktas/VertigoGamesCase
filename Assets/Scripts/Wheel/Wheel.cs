@@ -112,6 +112,8 @@ namespace Core
             var level = LevelManager.GetLevel();
             if (level % 5 == 0)
                 return _sliceData[0];
+            if (level % 30 == 0)
+                return _sliceData[4];
             if(level < 10)
                 return _sliceData[1];
             if(level >= 10 && level < 20)
