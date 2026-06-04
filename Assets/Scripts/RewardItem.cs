@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +32,11 @@ namespace Core
             _amount += value;
             SetAmountText();
         }
-        private void SetAmountText() => _amountText.text = $"x {_amount.ToString()}";
+
+        private void SetAmountText()
+        {
+            _amountText.text = $"x {_amount.ToString()}";
+            _image.transform.DOPunchScale(new Vector2(.1f, .1f), .25f, 0, 0);
+        }
     }
 }

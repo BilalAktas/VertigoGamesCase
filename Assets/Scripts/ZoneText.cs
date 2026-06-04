@@ -31,7 +31,7 @@ namespace Core
 
         private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data)
         {
-            _text.fontSize = _level == LevelManager.GetLevel() ? 37 : 28;
+            _text.fontSize = _level == LevelManager.GetLevel() ? 40 : 25;
         }
     }   
 }

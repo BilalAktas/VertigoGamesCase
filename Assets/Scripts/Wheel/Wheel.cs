@@ -89,7 +89,7 @@ namespace Core
                         },
                         targetAngle,
                         .5f)
-                    .SetEase(Ease.Linear)
+                    .SetEase(Ease.OutSine)
             );
 
             sequence.OnComplete(() =>
@@ -101,10 +101,9 @@ namespace Core
 
         private void ShowReward(int rewardIndex)
         {
-            var reward = _wheelSlices[rewardIndex];
-            EventBus.Raise<OnShowRewardEvent>(new OnShowRewardEvent()
+            EventBus.Raise<OnWheelSpinEndedEvent>(new OnWheelSpinEndedEvent()
             {
-                RewardData = reward.RewardData
+                Index = rewardIndex
             });
         }
 
