@@ -7,7 +7,7 @@ namespace Core
 {
     public class Wheel : MonoBehaviour
     {
-        [SerializeField] private SliceData _sliceData;
+        [SerializeField] private SliceData[] _sliceData;
         [SerializeField] private Button _spinButton;
         private WheelSlice[] _wheelSlices;
         
@@ -23,16 +23,16 @@ namespace Core
         {
             _wheelSlices = GetComponentsInChildren<WheelSlice>();
             
-            ResetWheel(new OnRewardActionEndedEvent());
+            ResetWheel(new OnZoneUIAnimationEndedEvent());
             _spinButton.onClick.AddListener(Spin);
             
-            EventBus.Subscribe<OnRewardActionEndedEvent>(ResetWheel);
+            EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
         }
 
         private void OnDestroy()
         {
             _spinButton.onClick.RemoveAllListeners();
-            EventBus.Unsubscribe<OnRewardActionEndedEvent>(ResetWheel);
+            EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
         }
         
         private void Spin()
@@ -108,7 +108,22 @@ namespace Core
             });
         }
 
-        private void ResetWheel(OnRewardActionEndedEvent data)
+        private SliceData GetSliceData()
+        {
+            var level = LevelManager.GetLevel();
+            if (level % 5 == 0)
+                return _sliceData[0];
+            if(level < 10)
+                return _sliceData[1];
+            if(level >= 10 && level < 20)
+                return _sliceData[2];
+            if(level >= 20)
+                return _sliceData[3];
+
+            return _sliceData[1];
+        }
+
+        private void ResetWheel(OnZoneUIAnimationEndedEvent data)
         {
             _spinButton.gameObject.SetActive(true);
             _spinButton.transform.localScale = Vector2.one;
@@ -116,7 +131,7 @@ namespace Core
 
             EventBus.Raise(new OnSetWheelSlicesEvent
             {
-                SliceData = _sliceData
+                SliceData = GetSliceData()
             });
         }
     }
