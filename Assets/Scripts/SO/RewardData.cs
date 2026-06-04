@@ -18,7 +18,7 @@ namespace Core
         [SerializeField] private Sprite _sprite;
         
         public RewardType RewardType => _rewardType;
-        public  string Name => _name;
+        public string Name => _name;
         public Sprite Sprite => _sprite;
     }
 }
