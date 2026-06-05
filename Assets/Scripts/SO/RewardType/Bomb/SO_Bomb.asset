@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 3
   _name: Bomb
   _sprite: {fileID: 21300000, guid: 79c4ba9f6a6a28e498de09bbede82abc, type: 3}
+  _weight: 0.5

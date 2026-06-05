@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: SMG
   _sprite: {fileID: 21300000, guid: 5f3c3dfef2b24064180472114b854f3c, type: 3}
+  _weight: 1

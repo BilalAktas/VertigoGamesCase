@@ -12,7 +12,8 @@ namespace Core
         [SerializeField] private Image _image;
         [SerializeField] private TextMeshProUGUI _amountText;
         private RectTransform _rectTransform;
-
+        [SerializeField] private AudioSource _collectRewardSound;
+        
         private void OnEnable()
         {
             _image.enabled = false;
@@ -33,13 +34,10 @@ namespace Core
         {
             _amount += value;
             SetAmountText();
+            _image.transform.DOPunchScale(new Vector2(.15f, .15f), .5f, 0, 0);
         }
 
-        private void SetAmountText()
-        {
-            _amountText.text = $"x {_amount.ToString()}";
-            _image.transform.DOPunchScale(new Vector2(.1f, .1f), .25f, 0, 0);
-        }
+        private void SetAmountText() => _amountText.text = $"x {_amount.ToString()}";
 
         public void Claim(RectTransform target)
         {
@@ -52,6 +50,7 @@ namespace Core
 
             sequence.OnComplete(() =>
             {
+                _collectRewardSound.Play();
                 if (RewardData.RewardType == RewardType.Money)
                 {
                     if(RewardData.Name.Equals("Cash")) PlayerEconomyManager.Instance.AddCash(_amount, true);

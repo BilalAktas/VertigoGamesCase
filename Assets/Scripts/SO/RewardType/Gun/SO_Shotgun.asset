@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: Shotgun
   _sprite: {fileID: 21300000, guid: 41cd2e38bdc6f68448d695efc7348e9c, type: 3}
+  _weight: 1

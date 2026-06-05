@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 0
   _name: Gold
   _sprite: {fileID: 21300000, guid: e0655716caefd3f4abef70f21792097a, type: 3}
+  _weight: 1.7

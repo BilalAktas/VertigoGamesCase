@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: Sniper
   _sprite: {fileID: 21300000, guid: cf65f1cc2d051cd45ac6c5ece72e001d, type: 3}
+  _weight: 1

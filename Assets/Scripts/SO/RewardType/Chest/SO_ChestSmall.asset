@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 1
   _name: ChestSmall
   _sprite: {fileID: 21300000, guid: 76574562b1923d3418bb04295e5cc247, type: 3}
+  _weight: 1

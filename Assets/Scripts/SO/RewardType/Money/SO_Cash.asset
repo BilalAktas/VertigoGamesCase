@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 0
   _name: Cash
   _sprite: {fileID: 21300000, guid: 4461dcb55af36564a8210a397c84e25f, type: 3}
+  _weight: 1.7

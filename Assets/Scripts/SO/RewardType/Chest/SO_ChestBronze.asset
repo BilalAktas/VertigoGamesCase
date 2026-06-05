@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 1
   _name: ChestBronze
   _sprite: {fileID: 21300000, guid: 0acc7e397499d454a85dc4e80e7418d0, type: 3}
+  _weight: 1

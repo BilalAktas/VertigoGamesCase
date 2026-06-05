@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: BayonetSummer
   _sprite: {fileID: 21300000, guid: 821efe4e51aaa2e4eba24b05c1543b91, type: 3}
+  _weight: 1

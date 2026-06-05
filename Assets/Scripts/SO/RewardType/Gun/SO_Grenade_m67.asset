@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: Grenade_m67
   _sprite: {fileID: 21300000, guid: fbd57c6f58ac3a04993553b92fcaaaa4, type: 3}
+  _weight: 1

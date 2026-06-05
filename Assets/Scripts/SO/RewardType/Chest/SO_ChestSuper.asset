@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 1
   _name: ChestSuper
   _sprite: {fileID: 21300000, guid: 400c48d7b5523e84eb89bb261b3158b1, type: 3}
+  _weight: 1

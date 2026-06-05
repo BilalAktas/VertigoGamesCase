@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: BayonetEaster
   _sprite: {fileID: 21300000, guid: e1b0795e5de1f3b49856ccc7517200a0, type: 3}
+  _weight: 1

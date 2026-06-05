@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: Rifle
   _sprite: {fileID: 21300000, guid: 18f09755f31e2574abb1db575d98a4dd, type: 3}
+  _weight: 1

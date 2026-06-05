@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
+
 
 namespace Core
 {
@@ -13,19 +13,21 @@ namespace Core
         
         [SerializeField] private float _spinDuration;
         [SerializeField] private Animation _indicatorAnim;
-        
+
         private const int SLICE_COUNT = 8;
         private const int FULL_ROTATIONS = 5;
         private const float SLICE_ANGLE = 45f;
-        private const float OVERSHOOT_ANGLE = 5f;
+        [SerializeField] private float _overShootAngle = .4f;
         
+        [SerializeField] private AudioSource _spinSound;
+        [SerializeField] private AudioSource _rewardSound;
+
         private void Start()
         {
             _wheelSlices = GetComponentsInChildren<WheelSlice>();
-            
             ResetWheel(new OnZoneUIAnimationEndedEvent());
             _spinButton.onClick.AddListener(Spin);
-            
+
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
             EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
@@ -38,21 +40,25 @@ namespace Core
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
         }
-        
+
         private void Spin()
         {
             EventBus.Raise(new OnSpinStartedEvent());
+
+            _spinButton.interactable = false;
             
-            _spinButton.transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
+            _spinSound.Play();
+
+            var datas = new RewardData[SLICE_COUNT];
+            var i = 0;
+            foreach (var slice in _wheelSlices)
             {
-                _spinButton.gameObject.SetActive(false);
-            });
-            
-            var rewardIndex = Random.Range(0, SLICE_COUNT);
+                datas[i] = slice.RewardData;
+                i++;
+            }
+            var rewardIndex = Helpers.GetWeightedIndex(datas);
 
             var targetAngle = (FULL_ROTATIONS * 360f) + (rewardIndex * SLICE_ANGLE);
-
-            var totalAngle = targetAngle + OVERSHOOT_ANGLE;
 
             var currentAngle = 0f;
             var lastTick = -1;
@@ -80,35 +86,22 @@ namespace Core
                                 }
                             }
                         },
-                        totalAngle,
-                        _spinDuration)
-                    .SetEase(Ease.OutCubic)
-            );
-
-            sequence.Append(
-                DOTween.To(
-                        () => currentAngle,
-                        angle =>
-                        {
-                            currentAngle = angle;
-                            transform.rotation = Quaternion.Euler(0f, 0f, angle);
-                        },
                         targetAngle,
-                        .5f)
-                    .SetEase(Ease.OutSine)
+                        _spinDuration)
+                    .SetEase(Ease.OutBack, _overShootAngle).OnComplete(() => { ShowReward(rewardIndex); })
             );
-
-            sequence.OnComplete(() =>
-            {
-                ShowReward(rewardIndex);
-            });
         }
 
         private void ShowReward(int rewardIndex)
         {
-            EventBus.Raise(new OnWheelSpinEndedEvent()
+            _spinButton.transform.DOScale(Vector2.zero, .02f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                Index = rewardIndex
+                _rewardSound.Play();
+                _spinButton.gameObject.SetActive(false);
+                EventBus.Raise(new OnWheelSpinEndedEvent()
+                {
+                    Index = rewardIndex
+                });
             });
         }
 
@@ -119,11 +112,11 @@ namespace Core
                 return _sliceData[0];
             if (level % 30 == 0)
                 return _sliceData[4];
-            if(level < 10)
+            if (level < 10)
                 return _sliceData[1];
-            if(level >= 10 && level < 20)
+            if (level >= 10 && level < 20)
                 return _sliceData[2];
-            if(level >= 20)
+            if (level >= 20)
                 return _sliceData[3];
 
             return _sliceData[1];
@@ -131,14 +124,17 @@ namespace Core
 
         private void ResetWheel(OnZoneUIAnimationEndedEvent data)
         {
-            _spinButton.gameObject.SetActive(true);
-            _spinButton.interactable = true;
-            _spinButton.transform.localScale = Vector2.one;
-            transform.rotation = Quaternion.identity;
-
-            EventBus.Raise(new OnSetWheelSlicesEvent
+            DOVirtual.DelayedCall(.25f, () =>
             {
-                SliceData = GetSliceData()
+                _spinButton.gameObject.SetActive(true);
+                _spinButton.interactable = true;
+                _spinButton.transform.localScale = Vector2.one;
+                //transform.rotation = Quaternion.identity;
+
+                EventBus.Raise(new OnSetWheelSlicesEvent
+                {
+                    SliceData = GetSliceData()
+                });
             });
         }
 

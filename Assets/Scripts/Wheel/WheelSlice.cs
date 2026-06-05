@@ -12,35 +12,49 @@ namespace Core
         private TextMeshProUGUI _amountText;
         private RectTransform _rectTransform;
         private int _amount;
-        
-        
+
+
         private void Start()
         {
             _rectTransform = GetComponent<RectTransform>();
-            
+
             _sliceImage = transform.GetChild(0).GetComponent<Image>();
             _amountText = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-            
+
             EventBus.Subscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
+            EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
+            EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
+        }
+
+        private void OnClaimStarted(OnClaimStartedEvent data)
+        {
+            transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
         }
 
         private void SetSlice(OnSetWheelSlicesEvent data)
         {
-            RewardData = data.SliceData.Rewards[Random.Range(0, data.SliceData.Rewards.Length)];
-            _sliceImage.sprite = RewardData.Sprite;
-            transform.localScale = Vector2.one;
-            _amount = RewardData.RewardType != RewardType.Money ? 1
-                : (int)Random.Range(100 * LevelManager.GetLevel(),
-                    (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
-            _amountText.text = $"x{_amount}";
-            SetColorAlpha(1f);
+            transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
+            {
+                RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards)];
+                //RewardData = data.SliceData.Rewards[Random.Range(0, data.SliceData.Rewards.Length)];
+                _sliceImage.sprite = RewardData.Sprite;
+
+                _amount = RewardData.RewardType != RewardType.Money
+                    ? 1
+                    : (int)Random.Range(100 * LevelManager.GetLevel(),
+                        (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
+                _amountText.text = $"x{_amount}";
+                SetColorAlpha(1f);
+
+                transform.DOScale(Vector2.one, .15f).SetEase(Ease.Linear);
+            });
         }
 
         private void SetColorAlpha(float value)
@@ -56,25 +70,12 @@ namespace Core
                 SetColorAlpha(.2f);
                 return;
             }
-            
-            var startPos = _rectTransform.anchoredPosition;
-            
-            var s = DOTween.Sequence();
-            s.Append(transform.DOPunchScale(new Vector2(.5f, .5f), .5f, 0, 0));
-            s.Append(_rectTransform.DOAnchorPos(Vector2.zero, .5f).SetEase(Ease.InOutQuad));
 
-            s.OnComplete(() =>
+            EventBus.Raise(new OnShowRewardEvent()
             {
-                _rectTransform.anchoredPosition = startPos;
-                transform.localScale = Vector2.zero;
-                EventBus.Raise(new OnShowRewardEvent()
-                {
-                    RewardData = RewardData,
-                    Amount = _amount
-                });
+                RewardData = RewardData,
+                Amount = _amount
             });
         }
-    }    
+    }
 }
-
-

@@ -15,3 +15,4 @@ MonoBehaviour:
   _rewardType: 2
   _name: Molotov
   _sprite: {fileID: 21300000, guid: ac85104582e3d0d4daf121cb598d0563, type: 3}
+  _weight: 1

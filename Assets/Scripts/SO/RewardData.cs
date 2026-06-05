@@ -16,9 +16,11 @@ namespace Core
         [SerializeField] private RewardType _rewardType;
         [Tooltip("Display name shown in the UI.")] [SerializeField] private string _name;
         [SerializeField] private Sprite _sprite;
+        [SerializeField] private float _weight;
         
         public RewardType RewardType => _rewardType;
         public string Name => _name;
         public Sprite Sprite => _sprite;
+        public float Weight => _weight;
     }
 }

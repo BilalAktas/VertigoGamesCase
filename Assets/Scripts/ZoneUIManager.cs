@@ -26,7 +26,7 @@ namespace Core
         {
             LevelManager.IncreaseLevel();
             var cX = _content.anchoredPosition.x - 70;
-            _content.DOAnchorPosX(cX, 1f).OnComplete(() =>
+            _content.DOAnchorPosX(cX, .75f).SetEase(Ease.Linear).OnComplete(() =>
             {
                 EventBus.Raise(new OnZoneUIAnimationEndedEvent());
             });
@@ -39,7 +39,11 @@ namespace Core
 
         private void OnReset()
         {
-            _content.anchoredPosition = Vector2.zero;
+            _content.anchorMin = new Vector2(0f, 0f);
+            _content.anchorMax = new Vector2(1f, 1f);
+            _content.offsetMin = new Vector2(40f, 0f);
+            _content.offsetMax = new Vector2(0f, 0f);
+            
             foreach (var item in _spawnedZoneText.ToArray())
                 Destroy(item);
             
