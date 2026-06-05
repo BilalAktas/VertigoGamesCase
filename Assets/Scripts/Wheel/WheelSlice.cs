@@ -53,7 +53,7 @@ namespace Core
                     ? 1
                     : (int)Random.Range(100 * LevelManager.GetLevel(),
                         (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
-                _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{_amount}";
+                _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{Helpers.ConvertToKBM(_amount)}";
                 SetColorAlpha(1f);
 
                 transform.DOScale(Vector2.one, .15f).SetEase(Ease.Linear);

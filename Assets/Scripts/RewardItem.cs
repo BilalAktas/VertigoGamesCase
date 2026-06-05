@@ -38,7 +38,7 @@ namespace Core
             _image.transform.DOPunchScale(new Vector2(.15f, .15f), .5f, 0, 0);
         }
 
-        private void SetAmountText() => _amountText.text = $"x {_amount.ToString()}";
+        private void SetAmountText() => _amountText.text = $"x {Helpers.ConvertToKBM(_amount)}";
 
         public void Claim(RectTransform target)
         {

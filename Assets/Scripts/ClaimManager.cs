@@ -18,7 +18,7 @@ namespace Core
 
         [SerializeField] private GameObject _rewardInfoTextPrefab;
         [SerializeField] private Transform _inventoryInfoTextParent;
-        
+        private Tween _claimButtonTween;
 
         
         private void Start()
@@ -37,13 +37,35 @@ namespace Core
             EventBus.Unsubscribe<OnRewardCollectedEvent>(OnRewardCollected);
         }
 
-        private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data) => _claimButton.interactable =
-            LevelManager.GetLevel() % 5 == 0 || LevelManager.GetLevel() % 30 == 0;
-        private void OnSpinStartedEvent(OnSpinStartedEvent data) => _claimButton.interactable = false;
+        private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data)
+        {
+            _claimButton.interactable =
+                LevelManager.GetLevel() % 5 == 0 || LevelManager.GetLevel() % 30 == 0;
 
+            if (_claimButton.interactable)
+                _claimButtonTween = _claimButton.transform.DOPunchScale(new Vector3(.02f, .02f, .02f), .5f, 0, 0).SetLoops(-1);
+            else
+            {
+                ClaimButtonAnimReset();
+            }
+        }
+        private void OnSpinStartedEvent(OnSpinStartedEvent data) 
+        {
+            _claimButton.interactable = false;
+            ClaimButtonAnimReset();
+        }
+
+        private void ClaimButtonAnimReset()
+        {
+            _claimButtonTween.Kill();
+            _claimButton.transform.localScale = Vector2.one;
+        }
+        
         private async void Claim()
         {
             _claimButton.interactable = false;
+            ClaimButtonAnimReset();
+            
             EventBus.Raise(new OnClaimStartedEvent());
             var rewards = _rewardContent.GetComponentsInChildren<RewardItem>();
             

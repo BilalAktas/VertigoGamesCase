@@ -16,8 +16,8 @@ namespace Core
 
         private void Start()
         {
-            _cashText.text = GetCash().ToString();
-            _goldText.text = GetGold().ToString();
+            _cashText.text = Helpers.ConvertToKBM(GetCash());
+            _goldText.text = Helpers.ConvertToKBM(GetGold());
         }
 
 
@@ -29,10 +29,10 @@ namespace Core
             switch (anim)
             {
                 case true:
-                    DOTween.To(()=> currentCash,  x => _cashText.text = x.ToString(), nCash, 1).SetEase(Ease.Linear);
+                    DOTween.To(()=> currentCash,  x => _cashText.text = Helpers.ConvertToKBM(x), nCash, 1).SetEase(Ease.Linear);
                     break;
                 case false:
-                    _cashText.text = nCash.ToString();
+                    _cashText.text = Helpers.ConvertToKBM(nCash);
                     break;
             }
         }
@@ -45,10 +45,10 @@ namespace Core
             switch (anim)
             {
                 case true:
-                    DOTween.To(()=> currentGold,  x => _goldText.text = x.ToString(), nGold, 1).SetEase(Ease.Linear);
+                    DOTween.To(()=> currentGold,  x => _goldText.text = Helpers.ConvertToKBM(x), nGold, 1).SetEase(Ease.Linear);
                     break;
                 case false:
-                    _goldText.text = nGold.ToString();
+                    _goldText.text = Helpers.ConvertToKBM(nGold);
                     break;
             }
         }

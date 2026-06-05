@@ -21,6 +21,7 @@ namespace Core
 
         [SerializeField] private AudioSource _loseSound;
         [SerializeField] private AudioSource _rewardSound;
+        [SerializeField] private AudioSource _pickUpSound;
         
         private void Start()
         {
@@ -158,6 +159,7 @@ namespace Core
             Canvas.ForceUpdateCanvases();
             movingRect.DOMove(targetRect.position, 0.5f).OnComplete(() =>
             {
+                _pickUpSound.Play();
                 _rewardImage.transform.localScale = Vector2.zero;
                 movingRect.anchoredPosition = Vector2.zero;
                 EventBus.Raise(new OnRewardActionEndedEvent());

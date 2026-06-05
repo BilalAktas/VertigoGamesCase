@@ -24,6 +24,8 @@ namespace Core
 
         private void Start()
         {
+            Application.targetFrameRate = 60;
+            
             _wheelSlices = GetComponentsInChildren<WheelSlice>();
             ResetWheel(new OnZoneUIAnimationEndedEvent());
             _spinButton.onClick.AddListener(Spin);
