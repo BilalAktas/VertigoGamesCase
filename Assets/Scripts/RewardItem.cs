@@ -25,6 +25,7 @@ namespace Core
         {
             RewardData = data;
             _image.enabled = true;
+            _image.preserveAspect = true;
             _image.sprite = RewardData.Sprite;
             _amount = amount;
             SetAmountText();

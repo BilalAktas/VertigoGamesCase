@@ -14,13 +14,15 @@ namespace Core
     public class RewardData : ScriptableObject
     {
         [SerializeField] private RewardType _rewardType;
-        [Tooltip("Display name shown in the UI.")] [SerializeField] private string _name;
         [SerializeField] private Sprite _sprite;
-        [SerializeField] private float _weight;
+        [Tooltip("Display name shown in the UI.")] [SerializeField] private string _name;
+        [Tooltip("Weight used when assigning rewards to wheel slots.")] [SerializeField] private float _placementWeight = 1f;
+        [Tooltip("Weight used when selecting this reward from a spin.")] [SerializeField] private float _selectionWeight = 1f;
         
         public RewardType RewardType => _rewardType;
         public string Name => _name;
         public Sprite Sprite => _sprite;
-        public float Weight => _weight;
+        public float PlacementWeight => _placementWeight;
+        public float SelectionWeight => _selectionWeight;
     }
 }

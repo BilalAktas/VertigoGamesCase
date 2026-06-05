@@ -18,23 +18,39 @@ namespace Core
         private const int MAX_SHOW_AMOUNT = 4;
         private const float DISTANCE_BETWEEN_ITEMS = 175f;
         private List<int> _currentItemIndexes = new();
+
+        [SerializeField] private AudioSource _loseSound;
+        [SerializeField] private AudioSource _rewardSound;
         
         private void Start()
         {
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnShowRewardEvent>(Show);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void Show(OnShowRewardEvent data)
         {
             Debug.Log($"reward: {data.RewardData.Name}");
+
+            if (data.RewardData.RewardType == RewardType.Bomb)
+            {
+                _loseSound.Play();
+                DOVirtual.DelayedCall(1f, () =>
+                {
+                    EventBus.Raise(new OnBombExplodedEvent());
+                });
+                return;
+            }
+            _rewardSound.Play();
             _rewardImage.sprite = data.RewardData.Sprite;
             _animation.Play();
             
@@ -150,6 +166,7 @@ namespace Core
         }
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
+        private void OnBombExploded(OnBombExplodedEvent data) => OnReset();
 
         private void OnReset()
         {

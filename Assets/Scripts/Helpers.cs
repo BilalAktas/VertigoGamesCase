@@ -4,23 +4,25 @@ namespace Core
 {
     public class Helpers
     {
-        public static int GetWeightedIndex(RewardData[] datas)
+        public static int GetWeightedIndex(RewardData[] datas, int state)
         {
             var total = 0f;
 
-            for (var i = 0; i < datas.Length; i++)
-                total += datas[i].Weight;
-
+            foreach (var data in datas)
+                total += state == 0 ? data.PlacementWeight : data.SelectionWeight;
+            
             var rand = Random.value * total;
-
             var current = 0f;
 
-            for (var i = 0; i < datas.Length; i++)
+            var i = 0;
+            foreach (var data in datas)
             {
-                current += datas[i].Weight;
+                current += state == 0 ? data.PlacementWeight : data.SelectionWeight;
 
                 if (rand <= current)
                     return i;
+                
+                i++;
             }
 
             return datas.Length - 1;

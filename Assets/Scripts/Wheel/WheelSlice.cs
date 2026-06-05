@@ -10,20 +10,18 @@ namespace Core
         public RewardData RewardData { get; private set; }
         private Image _sliceImage;
         private TextMeshProUGUI _amountText;
-        private RectTransform _rectTransform;
         private int _amount;
 
 
         private void Start()
         {
-            _rectTransform = GetComponent<RectTransform>();
-
             _sliceImage = transform.GetChild(0).GetComponent<Image>();
             _amountText = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 
             EventBus.Subscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
             EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
+            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnDestroy()
@@ -31,6 +29,7 @@ namespace Core
             EventBus.Unsubscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
+            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnClaimStarted(OnClaimStartedEvent data)
@@ -38,19 +37,23 @@ namespace Core
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
         }
 
+        private void OnBombExploded(OnBombExplodedEvent data)
+        {
+            transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear);
+        }
+
         private void SetSlice(OnSetWheelSlicesEvent data)
         {
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards)];
-                //RewardData = data.SliceData.Rewards[Random.Range(0, data.SliceData.Rewards.Length)];
+                RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards, 0)];
                 _sliceImage.sprite = RewardData.Sprite;
 
                 _amount = RewardData.RewardType != RewardType.Money
                     ? 1
                     : (int)Random.Range(100 * LevelManager.GetLevel(),
                         (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
-                _amountText.text = $"x{_amount}";
+                _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{_amount}";
                 SetColorAlpha(1f);
 
                 transform.DOScale(Vector2.one, .15f).SetEase(Ease.Linear);

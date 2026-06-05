@@ -20,7 +20,7 @@ namespace Core
         [SerializeField] private float _overShootAngle = .4f;
         
         [SerializeField] private AudioSource _spinSound;
-        [SerializeField] private AudioSource _rewardSound;
+        
 
         private void Start()
         {
@@ -31,6 +31,7 @@ namespace Core
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
             EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnDestroy()
@@ -39,6 +40,7 @@ namespace Core
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void Spin()
@@ -56,7 +58,7 @@ namespace Core
                 datas[i] = slice.RewardData;
                 i++;
             }
-            var rewardIndex = Helpers.GetWeightedIndex(datas);
+            var rewardIndex = Helpers.GetWeightedIndex(datas, 1);
 
             var targetAngle = (FULL_ROTATIONS * 360f) + (rewardIndex * SLICE_ANGLE);
 
@@ -96,7 +98,7 @@ namespace Core
         {
             _spinButton.transform.DOScale(Vector2.zero, .02f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                _rewardSound.Play();
+                
                 _spinButton.gameObject.SetActive(false);
                 EventBus.Raise(new OnWheelSpinEndedEvent()
                 {
@@ -141,5 +143,6 @@ namespace Core
         private void OnClaimStarted(OnClaimStartedEvent data) => _spinButton.interactable = false;
 
         private void OnClaimEnded(OnClaimEndedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
+        private void OnBombExploded(OnBombExplodedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
     }
 }

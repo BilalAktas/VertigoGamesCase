@@ -14,12 +14,14 @@ namespace Core
         {
             EventBus.Subscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
         }
 
         private void OnRewardActionEnded(OnRewardActionEndedEvent data)
@@ -36,6 +38,7 @@ namespace Core
         }
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
+        private void OnBombExploded(OnBombExplodedEvent data) => OnReset();
 
         private void OnReset()
         {

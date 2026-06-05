@@ -11,6 +11,8 @@ namespace Core
     public struct OnSpinStartedEvent : IEvent { }
     public struct OnClaimStartedEvent : IEvent { }
     public struct OnClaimEndedEvent : IEvent { }
+    
+    public struct OnBombExplodedEvent : IEvent {}
 
     public struct OnRewardCollectedEvent : IEvent {
         public RewardData RewardData;
