@@ -18,8 +18,7 @@ namespace Core
         private const int MAX_SHOW_AMOUNT = 4;
         private const float DISTANCE_BETWEEN_ITEMS = 175f;
         private List<int> _currentItemIndexes = new();
-
-        [SerializeField] private AudioSource _loseSound;
+        
         [SerializeField] private AudioSource _rewardSound;
         [SerializeField] private AudioSource _pickUpSound;
         
@@ -28,14 +27,16 @@ namespace Core
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
+          
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnShowRewardEvent>(Show);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
+          
         }
 
         private void Show(OnShowRewardEvent data)
@@ -44,11 +45,7 @@ namespace Core
 
             if (data.RewardData.RewardType == RewardType.Bomb)
             {
-                _loseSound.Play();
-                DOVirtual.DelayedCall(1f, () =>
-                {
-                    EventBus.Raise(new OnBombExplodedEvent());
-                });
+                EventBus.Raise(new OnBombExplodedEvent());
                 return;
             }
             _rewardSound.Play();
@@ -108,7 +105,7 @@ namespace Core
                 var clone = Instantiate(_rewardItemPrefab, _rewardContentUI.transform);
                 var targetRect = clone.GetComponent<RectTransform>();
                 
-                var pos = new Vector2(-75f, 250 + (-DISTANCE_BETWEEN_ITEMS * clone.transform.GetSiblingIndex()));
+                var pos = new Vector2(-30f, 250 + (-DISTANCE_BETWEEN_ITEMS * clone.transform.GetSiblingIndex()));
                 targetRect.anchoredPosition = pos;
 
                 var clonedItem = clone.GetComponent<RewardItem>();
@@ -134,9 +131,10 @@ namespace Core
 
                 DOVirtual.DelayedCall(delay, () =>
                 {
+                    clonedItem.Set(data.RewardData, data.Amount);
                     RewardImageAnimation(movingRect, targetRect, () =>
                     {
-                        clonedItem.Set(data.RewardData, data.Amount);
+                        clonedItem.PlayScaleAnimation();
                     });
                 });
                 
@@ -168,8 +166,9 @@ namespace Core
         }
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
-        private void OnBombExploded(OnBombExplodedEvent data) => OnReset();
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => OnReset();
 
+        
         private void OnReset()
         {
             _currentItemIndexes.Clear();

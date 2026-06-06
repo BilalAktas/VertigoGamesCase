@@ -21,7 +21,7 @@ namespace Core
             EventBus.Subscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
             EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
-            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void OnDestroy()
@@ -29,7 +29,7 @@ namespace Core
             EventBus.Unsubscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
-            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void OnClaimStarted(OnClaimStartedEvent data)
@@ -37,11 +37,12 @@ namespace Core
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
         }
 
-        private void OnBombExploded(OnBombExplodedEvent data)
+        private void OnFailGiveUp(OnFailGiveUpEvent data)
         {
             transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear);
         }
-
+        
+        
         private void SetSlice(OnSetWheelSlicesEvent data)
         {
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
@@ -73,7 +74,7 @@ namespace Core
                 SetColorAlpha(.2f);
                 return;
             }
-
+            
             EventBus.Raise(new OnShowRewardEvent()
             {
                 RewardData = RewardData,

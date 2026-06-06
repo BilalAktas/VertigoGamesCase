@@ -19,6 +19,9 @@ namespace Core
         public int Amount;
     }
     
+    public struct OnFailGiveUpEvent : IEvent {}
+    public struct OnGoldReviveEvent : IEvent {}
+    
     public class Events
     {
     }

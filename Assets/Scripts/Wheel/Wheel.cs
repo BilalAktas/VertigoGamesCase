@@ -20,6 +20,7 @@ namespace Core
         [SerializeField] private float _overShootAngle = .4f;
         
         [SerializeField] private AudioSource _spinSound;
+        [SerializeField] private AudioSource _spinSliceTickSound;
         
 
         private void Start()
@@ -33,7 +34,9 @@ namespace Core
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
             EventBus.Subscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
+            EventBus.Subscribe<OnGoldReviveEvent>(OnGoldRevive);
+       
         }
 
         private void OnDestroy()
@@ -42,7 +45,8 @@ namespace Core
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
+            EventBus.Unsubscribe<OnGoldReviveEvent>(OnGoldRevive);
         }
 
         private void Spin()
@@ -83,11 +87,12 @@ namespace Core
                             if (currentTick != lastTick)
                             {
                                 lastTick = currentTick;
-
-                                if (currentTick < targetTick)
-                                {
-                                    _indicatorAnim.Play();
-                                }
+                                _indicatorAnim.Play();
+                                _spinSliceTickSound.Play();
+                                // if (currentTick < targetTick)
+                                // {
+                                //     _indicatorAnim.Play();
+                                // }
                             }
                         },
                         targetAngle,
@@ -143,8 +148,8 @@ namespace Core
         }
 
         private void OnClaimStarted(OnClaimStartedEvent data) => _spinButton.interactable = false;
-
         private void OnClaimEnded(OnClaimEndedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
-        private void OnBombExploded(OnBombExplodedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
+        private void OnGoldRevive(OnGoldReviveEvent obj) => ResetWheel(new OnZoneUIAnimationEndedEvent());
     }
 }

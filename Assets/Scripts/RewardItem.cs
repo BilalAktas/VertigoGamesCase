@@ -23,19 +23,33 @@ namespace Core
 
         public void Set(RewardData data,  int amount)
         {
+            transform.localScale = Vector2.zero;
             RewardData = data;
             _image.enabled = true;
             _image.preserveAspect = true;
             _image.sprite = RewardData.Sprite;
             _amount = amount;
             SetAmountText();
+            transform.DOScale(1, .2f).SetEase(Ease.Linear);
         }
 
         public void Add(int value)
         {
             _amount += value;
             SetAmountText();
-            _image.transform.DOPunchScale(new Vector2(.15f, .15f), .5f, 0, 0);
+            PlayScaleAnimation();
+        }
+
+        public void PlayScaleAnimation()
+        {
+            DOVirtual.DelayedCall(.05f, () =>
+            {
+                transform.DOScale(new Vector3(1.3f, 1.3f, 1.3f), .2f).OnComplete(() =>
+                {
+                    transform.DOScale(1, .1f);
+                });
+            });
+            
         }
 
         private void SetAmountText() => _amountText.text = $"x {Helpers.ConvertToKBM(_amount)}";

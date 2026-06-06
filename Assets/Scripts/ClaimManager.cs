@@ -130,7 +130,7 @@ namespace Core
             var cText =clone.GetComponent<TextMeshProUGUI>();
             var cRect = clone.GetComponent<RectTransform>(); 
             cText.text = $"{data.RewardData.Name} x{data.Amount}";
-            cRect.anchoredPosition = new Vector2(-200, -75);
+            cRect.anchoredPosition = new Vector2(-275, -75);
             cText.DOFade(0, .4f).SetEase(Ease.Linear);
             cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() =>
             {

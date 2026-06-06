@@ -14,21 +14,21 @@ namespace Core
         {
             EventBus.Subscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
-            EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
+            EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void OnRewardActionEnded(OnRewardActionEndedEvent data)
         {
             LevelManager.IncreaseLevel();
             var cX = _content.anchoredPosition.x - 70;
-            _content.DOAnchorPosX(cX, .75f).SetEase(Ease.Linear).OnComplete(() =>
+            _content.DOAnchorPosX(cX, .25f).SetEase(Ease.Linear).OnComplete(() =>
             {
                 EventBus.Raise(new OnZoneUIAnimationEndedEvent());
             });
@@ -38,7 +38,7 @@ namespace Core
         }
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
-        private void OnBombExploded(OnBombExplodedEvent data) => OnReset();
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => OnReset();
 
         private void OnReset()
         {
