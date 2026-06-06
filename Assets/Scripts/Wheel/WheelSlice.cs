@@ -27,7 +27,7 @@ namespace Core
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnSetWheelSlicesEvent>(SetSlice);
-            EventBus.Subscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
+            EventBus.Unsubscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);
             EventBus.Unsubscribe<OnClaimStartedEvent>(OnClaimStarted);
             EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
