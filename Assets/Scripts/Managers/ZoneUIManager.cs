@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Core
 {
@@ -10,11 +11,17 @@ namespace Core
         [SerializeField] private GameObject _zoneTextPrefab;
         private List<GameObject> _spawnedZoneText = new();
 
+        [SerializeField] private Image _zoneBg;
+        [SerializeField] private Sprite _zoneNormalBg;
+        [SerializeField] private Sprite _zoneSBg;
+
         private void Start()
         {
             EventBus.Subscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
+
+            SetZoneBg();
         }
 
         private void OnDestroy()
@@ -32,10 +39,14 @@ namespace Core
             {
                 EventBus.Raise(new OnZoneUIAnimationEndedEvent());
             });
-            
+
             var clone = Instantiate(_zoneTextPrefab, _content.transform);
             _spawnedZoneText.Add(clone);
+
+            SetZoneBg();
         }
+
+        private void SetZoneBg() => _zoneBg.sprite = LevelManager.GetLevel() % 5 == 0 ? _zoneSBg : _zoneNormalBg;
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
         private void OnFailGiveUp(OnFailGiveUpEvent data) => OnReset();
@@ -46,11 +57,13 @@ namespace Core
             _content.anchorMax = new Vector2(1f, 1f);
             _content.offsetMin = new Vector2(40f, 0f);
             _content.offsetMax = new Vector2(0f, 0f);
-            
+
             foreach (var item in _spawnedZoneText.ToArray())
                 Destroy(item);
-            
+
             _spawnedZoneText.Clear();
+
+            SetZoneBg();
         }
     }
 }

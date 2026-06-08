@@ -32,17 +32,9 @@ namespace Core
             EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
-        private void OnClaimStarted(OnClaimStartedEvent data)
-        {
-            transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
-        }
+        private void OnClaimStarted(OnClaimStartedEvent data) => transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear);
 
-        private void OnFailGiveUp(OnFailGiveUpEvent data)
-        {
-            transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear);
-        }
-        
-        
         private void SetSlice(OnSetWheelSlicesEvent data)
         {
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
@@ -50,10 +42,22 @@ namespace Core
                 RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards, 0)];
                 _sliceImage.sprite = RewardData.Sprite;
 
-                _amount = RewardData.RewardType != RewardType.Money
-                    ? 1
-                    : (int)Random.Range(100 * LevelManager.GetLevel(),
-                        (100 * LevelManager.GetLevel() * data.SliceData.AmountMultiplier));
+                switch (RewardData.RewardType)
+                {
+                    case RewardType.Money:
+                        _amount = (int)Random.Range(100 * LevelManager.GetLevel(),
+                            (100 * LevelManager.GetLevel() * data.SliceData.MoneyAmountMultiplier));
+                        break;
+
+                    case RewardType.Chest:
+                        _amount = Mathf.Min(Random.Range(1, LevelManager.GetLevel()), 10);
+                        break;
+
+                    default:
+                        _amount = 1;
+                        break;
+                }
+
                 _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{Helpers.ConvertToKBM(_amount)}";
                 SetColorAlpha(1f);
 
@@ -74,7 +78,7 @@ namespace Core
                 SetColorAlpha(.2f);
                 return;
             }
-            
+
             EventBus.Raise(new OnShowRewardEvent()
             {
                 RewardData = RewardData,

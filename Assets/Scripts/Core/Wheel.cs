@@ -2,7 +2,6 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 namespace Core
 {
     public class Wheel : MonoBehaviour
@@ -10,23 +9,28 @@ namespace Core
         [SerializeField] private SliceData[] _sliceData;
         [SerializeField] private Button _spinButton;
         private WheelSlice[] _wheelSlices;
-        
+
         [SerializeField] private float _spinDuration;
-        [SerializeField] private Animation _indicatorAnim;
+        [SerializeField] private Transform _indicator;
 
         private const int SLICE_COUNT = 8;
         private const int FULL_ROTATIONS = 5;
         private const float SLICE_ANGLE = 45f;
+        private const float INDICATOR_ANGLE_RATE = 32;
+        private const float INDICATOR_SOUND_RATE = 32;
+        private const float INDICATOR_UP_ANGLE = 50;
+
         [SerializeField] private float _overShootAngle = .4f;
-        
+
         [SerializeField] private AudioSource _spinSound;
         [SerializeField] private AudioSource _spinSliceTickSound;
-        
+
 
         private void Start()
         {
             Application.targetFrameRate = 60;
-            
+
+
             _wheelSlices = GetComponentsInChildren<WheelSlice>();
             ResetWheel(new OnZoneUIAnimationEndedEvent());
             _spinButton.onClick.AddListener(Spin);
@@ -36,7 +40,6 @@ namespace Core
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
             EventBus.Subscribe<OnGoldReviveEvent>(OnGoldRevive);
-       
         }
 
         private void OnDestroy()
@@ -49,12 +52,13 @@ namespace Core
             EventBus.Unsubscribe<OnGoldReviveEvent>(OnGoldRevive);
         }
 
+
         private void Spin()
         {
             EventBus.Raise(new OnSpinStartedEvent());
 
             _spinButton.interactable = false;
-            
+
             _spinSound.Play();
 
             var datas = new RewardData[SLICE_COUNT];
@@ -64,48 +68,76 @@ namespace Core
                 datas[i] = slice.RewardData;
                 i++;
             }
-            var rewardIndex = Helpers.GetWeightedIndex(datas, 1);
 
+            var rewardIndex = Helpers.GetWeightedIndex(datas, 1);
             var targetAngle = (FULL_ROTATIONS * 360f) + (rewardIndex * SLICE_ANGLE);
 
             var currentAngle = 0f;
             var lastTick = -1;
-            var targetTick = rewardIndex + (SLICE_COUNT * FULL_ROTATIONS);
+            var _previousAngle = 0f;
 
-            var sequence = DOTween.Sequence();
+            DOTween.To(
+                    () => currentAngle,
+                    angle =>
+                    {
+                        currentAngle = angle;
+                        transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-            sequence.Append(
-                DOTween.To(
-                        () => currentAngle,
-                        angle =>
+
+                        var currentTick = Mathf.FloorToInt(angle / INDICATOR_SOUND_RATE);
+                        if (currentTick != lastTick)
                         {
-                            currentAngle = angle;
-                            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+                            lastTick = currentTick;
+                            _spinSliceTickSound.Play();
+                        }
 
-                            var currentTick = (int)(angle / SLICE_ANGLE);
 
-                            if (currentTick != lastTick)
+                        var delta = angle - _previousAngle;
+                        _previousAngle = angle;
+
+                        var angleInTick = angle % SLICE_ANGLE;
+                        var indicatorAngle = 0f;
+
+                        if (delta > 0)
+                        {
+                            if (angleInTick >= INDICATOR_ANGLE_RATE)
                             {
-                                lastTick = currentTick;
-                                _indicatorAnim.Play();
-                                _spinSliceTickSound.Play();
-                                // if (currentTick < targetTick)
-                                // {
-                                //     _indicatorAnim.Play();
-                                // }
+                                var t = Mathf.InverseLerp(
+                                    INDICATOR_ANGLE_RATE,
+                                    SLICE_ANGLE,
+                                    angleInTick);
+
+                                indicatorAngle = Mathf.Lerp(0f, -INDICATOR_UP_ANGLE, t);
                             }
-                        },
-                        targetAngle,
-                        _spinDuration)
-                    .SetEase(Ease.OutBack, _overShootAngle).OnComplete(() => { ShowReward(rewardIndex); })
-            );
+                            else
+                            {
+                                var t = angleInTick / INDICATOR_ANGLE_RATE;
+
+                                indicatorAngle = Mathf.Lerp(
+                                    -INDICATOR_UP_ANGLE,
+                                    0f,
+                                    t);
+                            }
+
+                            _indicator.localRotation =
+                                Quaternion.Euler(0, 0, indicatorAngle);
+                        }
+
+                        _indicator.localRotation = Quaternion.Lerp(_indicator.localRotation,
+                            Quaternion.identity, 2 * Time.deltaTime);
+                    },
+                    targetAngle,
+                    _spinDuration)
+                .SetEase(Ease.OutBack, _overShootAngle).OnComplete(() =>
+                {
+                    ShowReward(rewardIndex);
+                });
         }
 
         private void ShowReward(int rewardIndex)
         {
             _spinButton.transform.DOScale(Vector2.zero, .02f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                
                 _spinButton.gameObject.SetActive(false);
                 EventBus.Raise(new OnWheelSpinEndedEvent()
                 {
@@ -117,18 +149,20 @@ namespace Core
         private SliceData GetSliceData()
         {
             var level = LevelManager.GetLevel();
-            if (level % 5 == 0)
-                return _sliceData[0];
+
             if (level % 30 == 0)
                 return _sliceData[4];
+
+            if (level % 5 == 0)
+                return _sliceData[0];
+
             if (level < 10)
                 return _sliceData[1];
-            if (level >= 10 && level < 20)
-                return _sliceData[2];
-            if (level >= 20)
-                return _sliceData[3];
 
-            return _sliceData[1];
+            if (level < 20)
+                return _sliceData[2];
+
+            return _sliceData[3];
         }
 
         private void ResetWheel(OnZoneUIAnimationEndedEvent data)
@@ -138,7 +172,6 @@ namespace Core
                 _spinButton.gameObject.SetActive(true);
                 _spinButton.interactable = true;
                 _spinButton.transform.localScale = Vector2.one;
-                //transform.rotation = Quaternion.identity;
 
                 EventBus.Raise(new OnSetWheelSlicesEvent
                 {

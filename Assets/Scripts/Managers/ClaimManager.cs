@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using DG.Tweening;
+﻿using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,9 +18,13 @@ namespace Core
         [SerializeField] private Transform _inventoryInfoTextParent;
         private Tween _claimButtonTween;
 
-        
+        private Animation _claimButtonAnim;
+        private RectTransform _claimButtonRect;
+
         private void Start()
         {
+            _claimButtonAnim = _claimButton.GetComponent<Animation>();
+            _claimButtonRect = _claimButton.GetComponent<RectTransform>();
             _claimButton.onClick.AddListener(Claim);
             EventBus.Subscribe<OnSpinStartedEvent>(OnSpinStartedEvent);
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
@@ -43,13 +45,12 @@ namespace Core
                 LevelManager.GetLevel() % 5 == 0 || LevelManager.GetLevel() % 30 == 0;
 
             if (_claimButton.interactable)
-                _claimButtonTween = _claimButton.transform.DOPunchScale(new Vector3(.02f, .02f, .02f), .5f, 0, 0).SetLoops(-1);
+                _claimButtonAnim.Play();
             else
-            {
                 ClaimButtonAnimReset();
-            }
         }
-        private void OnSpinStartedEvent(OnSpinStartedEvent data) 
+
+        private void OnSpinStartedEvent(OnSpinStartedEvent data)
         {
             _claimButton.interactable = false;
             ClaimButtonAnimReset();
@@ -57,58 +58,62 @@ namespace Core
 
         private void ClaimButtonAnimReset()
         {
-            _claimButtonTween.Kill();
+            _claimButtonAnim.Stop();
+            _claimButtonRect.anchoredPosition = new Vector2(-130, 172);
             _claimButton.transform.localScale = Vector2.one;
         }
-        
-        private async void Claim()
+
+        private void Claim()
         {
             _claimButton.interactable = false;
             ClaimButtonAnimReset();
-            
+
             EventBus.Raise(new OnClaimStartedEvent());
             var rewards = _rewardContent.GetComponentsInChildren<RewardItem>();
-            
+
             var y = (rewards.Length - 4) > 0 ? (rewards.Length - 4) * 175 : 0;
+
+            var claimSequence = DOTween.Sequence();
 
             if (_rewardContent.anchoredPosition.y != y)
             {
-                await _rewardContent
-                    .DOAnchorPosY(y, .3f)
-                    .SetEase(Ease.Linear)
-                    .AsyncWaitForCompletion();
-                
-                
-                await Task.Delay(100);
+                claimSequence.Append(_rewardContent.DOAnchorPosY(y, .3f).SetEase(Ease.Linear));
+                claimSequence.AppendInterval(.1f);
             }
 
             var i = 0;
-            
-            foreach (var reward in rewards.Reverse())
+
+            for (var j = rewards.Length - 1; j >= 0; j--)
             {
-                
-                var target = GetTarget(reward);
-                reward.Claim(target);
+                var reward = rewards[j];
+
+                claimSequence.AppendCallback(() =>
+                {
+                    var target = GetTarget(reward);
+                    reward.Claim(target);
+                });
 
                 i++;
-                await Task.Delay(300);
-                
+
+                claimSequence.AppendInterval(.3f);
+
                 if (rewards.Length - i > 3)
                 {
                     y -= 175;
-                    
-                    await _rewardContent
-                        .DOAnchorPosY(y, .25f)
-                        .SetEase(Ease.Linear)
-                        .AsyncWaitForCompletion();
+                    claimSequence.Append(_rewardContent.DOAnchorPosY(y, .25f).SetEase(Ease.Linear));
                 }
             }
-            
-            await Task.Delay(1000);
-            LevelManager.ResetLevel();
-            EventBus.Raise(new OnClaimEndedEvent());
+
+            claimSequence.AppendInterval(1f);
+            claimSequence.AppendCallback(() =>
+            {
+                LevelManager.ResetLevel();
+                EventBus.Raise(new OnClaimEndedEvent());
+            });
+
+            claimSequence.SetLink(gameObject);
         }
-        
+
         private RectTransform GetTarget(RewardItem reward)
         {
             if (reward.RewardData.RewardType == RewardType.Money)
@@ -125,17 +130,14 @@ namespace Core
         }
 
         private void OnRewardCollected(OnRewardCollectedEvent data)
-        {   
+        {
             var clone = Instantiate(_rewardInfoTextPrefab, _inventoryInfoTextParent);
-            var cText =clone.GetComponent<TextMeshProUGUI>();
-            var cRect = clone.GetComponent<RectTransform>(); 
+            var cText = clone.GetComponent<TextMeshProUGUI>();
+            var cRect = clone.GetComponent<RectTransform>();
             cText.text = $"{data.RewardData.Name} x{data.Amount}";
             cRect.anchoredPosition = new Vector2(-275, -75);
             cText.DOFade(0, .4f).SetEase(Ease.Linear);
-            cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() =>
-            {
-                Destroy(clone);
-            });
+            cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() => { Destroy(clone); });
         }
     }
 }

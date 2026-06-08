@@ -10,7 +10,7 @@ namespace Core
     {
         [SerializeField] private Image _rewardImage;
         private Animation _animation;
-        
+
         private List<RewardItem> _rewardItems = new();
         [SerializeField] private GameObject _rewardItemPrefab;
         [SerializeField] private RectTransform _rewardContentUI;
@@ -18,17 +18,16 @@ namespace Core
         private const int MAX_SHOW_AMOUNT = 4;
         private const float DISTANCE_BETWEEN_ITEMS = 175f;
         private List<int> _currentItemIndexes = new();
-        
+
         [SerializeField] private AudioSource _rewardSound;
         [SerializeField] private AudioSource _pickUpSound;
-        
+
         private void Start()
         {
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
-          
         }
 
         private void OnDestroy()
@@ -36,37 +35,35 @@ namespace Core
             EventBus.Unsubscribe<OnShowRewardEvent>(Show);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
             EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
-          
         }
 
         private void Show(OnShowRewardEvent data)
         {
-            Debug.Log($"reward: {data.RewardData.Name}");
+            //Debug.Log($"reward: {data.RewardData.Name}");
 
             if (data.RewardData.RewardType == RewardType.Bomb)
             {
                 EventBus.Raise(new OnBombExplodedEvent());
                 return;
             }
+
             _rewardSound.Play();
             _rewardImage.sprite = data.RewardData.Sprite;
             _animation.Play();
-            
+
             var movingRect = GetComponent<RectTransform>();
 
-            var delay = 0;
-            DOVirtual.DelayedCall(2, () =>
+            var delay = 0f;
+            var speed = .6f;
+
+            DOVirtual.DelayedCall(1.2f, () =>
             {
                 var ind = 0;
                 foreach (var item in _rewardItems)
                 {
                     if (item.RewardData == data.RewardData)
                     {
-                        if (_currentItemIndexes.Contains(ind))
-                        {
-                                
-                        }
-                        else
+                        if (!_currentItemIndexes.Contains(ind))
                         {
                             var dir = ind < _currentItemIndexes[0] ? Vector2.up : Vector2.down;
                             if (dir == Vector2.up)
@@ -74,28 +71,30 @@ namespace Core
                                 var diff = _currentItemIndexes[0] - ind;
                                 SetCurrentItemIndexes(diff, -1);
 
-                                _rewardContentUI.DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (-DISTANCE_BETWEEN_ITEMS * diff), 1f);
-                                delay = 1;
+                                _rewardContentUI
+                                    .DOAnchorPosY(
+                                        _rewardContentUI.anchoredPosition.y + (-DISTANCE_BETWEEN_ITEMS * diff), speed)
+                                    .SetEase(Ease.Linear);
+                                delay = speed;
                             }
                             else
                             {
                                 var diff = ind - _currentItemIndexes[_currentItemIndexes.Count - 1];
                                 SetCurrentItemIndexes(diff, 1);
 
-                                _rewardContentUI.DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff), 1f);
-                                delay = 1;
+                                _rewardContentUI
+                                    .DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff),
+                                        speed).SetEase(Ease.Linear);
+                                delay = speed;
                             }
                         }
 
                         DOVirtual.DelayedCall(delay, () =>
                         {
                             var tRect = item.GetComponent<RectTransform>();
-                            RewardImageAnimation(movingRect, tRect, () =>
-                            {
-                                item.Add(data.Amount);
-                            });
+                            RewardImageAnimation(movingRect, tRect, () => { item.Add(data.Amount); });
                         });
-                        
+
                         return;
                     }
 
@@ -104,15 +103,14 @@ namespace Core
 
                 var clone = Instantiate(_rewardItemPrefab, _rewardContentUI.transform);
                 var targetRect = clone.GetComponent<RectTransform>();
-                
+
                 var pos = new Vector2(-30f, 250 + (-DISTANCE_BETWEEN_ITEMS * clone.transform.GetSiblingIndex()));
                 targetRect.anchoredPosition = pos;
 
                 var clonedItem = clone.GetComponent<RewardItem>();
                 _rewardItems.Add(clonedItem);
-                
-                
-                
+
+
                 if (_currentItemIndexes.Count < MAX_SHOW_AMOUNT)
                 {
                     _currentItemIndexes.Add(clone.transform.GetSiblingIndex());
@@ -121,23 +119,21 @@ namespace Core
                 {
                     var diff = (_rewardItems.Count - 1) - _currentItemIndexes[_currentItemIndexes.Count - 1];
                     SetCurrentItemIndexes(diff, 1);
-                    
 
-                    _rewardContentUI.DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff), 1f);
-                    delay = 1;
+
+                    _rewardContentUI
+                        .DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff), speed)
+                        .SetEase(Ease.Linear);
+                    delay = speed;
                 }
-                
-                
 
-                DOVirtual.DelayedCall(delay, () =>
-                {
-                    clonedItem.Set(data.RewardData, data.Amount);
-                    RewardImageAnimation(movingRect, targetRect, () =>
+
+                DOVirtual.DelayedCall(delay,
+                    () =>
                     {
-                        clonedItem.PlayScaleAnimation();
+                        RewardImageAnimation(movingRect, targetRect,
+                            () => { clonedItem.Set(data.RewardData, data.Amount); });
                     });
-                });
-                
             });
         }
 
@@ -147,8 +143,8 @@ namespace Core
             {
                 for (var i = 0; i < MAX_SHOW_AMOUNT; i++)
                 {
-                    _currentItemIndexes[i]+=value;
-                }    
+                    _currentItemIndexes[i] += value;
+                }
             }
         }
 
@@ -168,13 +164,12 @@ namespace Core
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();
         private void OnFailGiveUp(OnFailGiveUpEvent data) => OnReset();
 
-        
         private void OnReset()
         {
             _currentItemIndexes.Clear();
             foreach (var item in _rewardItems.ToArray())
                 Destroy(item.gameObject);
-            
+
             _rewardItems.Clear();
             _rewardContentUI.anchoredPosition = Vector2.zero;
         }

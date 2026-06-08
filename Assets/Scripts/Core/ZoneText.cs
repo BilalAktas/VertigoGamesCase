@@ -15,28 +15,27 @@ namespace Core
             SetText();
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
+            EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
         private void SetText()
         {
             _level = (transform.GetSiblingIndex() + 1);
             _text.text = _level.ToString();
-            _text.color = _level % 5 == 0 ?  Color.green : Color.white;
+            _text.color = _level % 5 == 0 ? Color.green : Color.white;
             OnZoneUIAnimationEnded(new OnZoneUIAnimationEndedEvent());
         }
-        
-        private void OnClaimEnded(OnClaimEndedEvent data) => SetText();
 
-        private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data)
-        {
-            var sc = _level < 10 ? 45 : 42;
-            _text.fontSize = _level == LevelManager.GetLevel() ? sc : 20;
-        }
-    }   
+        private void OnClaimEnded(OnClaimEndedEvent data) => SetText();
+        private void SetFontSize() => _text.fontSize = _level == LevelManager.GetLevel() ? 60 : 25;
+        private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data) => SetFontSize();
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => SetFontSize();
+    }
 }

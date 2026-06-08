@@ -10,7 +10,7 @@ namespace Core
 
             foreach (var data in datas)
                 total += state == 0 ? data.PlacementWeight : data.SelectionWeight;
-            
+
             var rand = Random.value * total;
             var current = 0f;
 
@@ -21,7 +21,7 @@ namespace Core
 
                 if (rand <= current)
                     return i;
-                
+
                 i++;
             }
 
@@ -29,18 +29,19 @@ namespace Core
         }
 
         private static string[] _suffix = { "", "K", "M", "B", "T", "Q", "QU", "S" };
+
         public static string ConvertToKBM(float value)
         {
             if (value < 1000)
                 return value.ToString();
-            
+
             var count = 0;
             while (value >= 1000f)
             {
                 count++;
                 value /= 1000f;
             }
-    
+
             return value < .01f && value != 0 ? $"{value:0.000}{_suffix[count]}" : $"{value:F}{_suffix[count]}";
         }
     }
