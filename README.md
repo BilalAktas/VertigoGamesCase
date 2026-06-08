@@ -20,6 +20,11 @@ FAL GIVE UP
 
 https://github.com/user-attachments/assets/f1e75073-ab24-4477-aabb-08f9ae2b78ef
 
+APK GAMEPLAY
+
+https://github.com/user-attachments/assets/b2de79d5-be18-4dd8-a09c-9a7483438e1e
+
+
 -----
 
 20:9
