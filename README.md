@@ -1,6 +1,10 @@
 Critical Strike ID: 6B4D6DF487486DDF
 
+Critical Strike Name: dahaal
+
 Polygun Arena ID: 1FE20C5B4F1CEEDC
+
+Polygun Arena Name: dahaal
 
 -----
 
