@@ -173,8 +173,10 @@ namespace Core
                 _spinButton.interactable = true;
                 _spinButton.transform.localScale = Vector2.one;
 
+                var bombIndex = Random.Range(0, 8);
                 EventBus.Raise(new OnSetWheelSlicesEvent
                 {
+                    SelectedBombIndex = bombIndex,
                     SliceData = GetSliceData()
                 });
             });

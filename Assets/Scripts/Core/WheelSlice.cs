@@ -39,7 +39,12 @@ namespace Core
         {
             transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards, 0)];
+                if (data.SelectedBombIndex == transform.GetSiblingIndex())
+                    RewardData = Helpers.GetBombData(data.SliceData.Rewards);
+                else
+                    RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards, 0)];
+                
+                
                 _sliceImage.sprite = RewardData.Sprite;
 
                 switch (RewardData.RewardType)

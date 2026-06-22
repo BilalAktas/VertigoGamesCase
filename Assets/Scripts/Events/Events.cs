@@ -2,6 +2,7 @@ namespace Core
 {
     public struct OnSetWheelSlicesEvent : IEvent
     {
+        public int SelectedBombIndex;
         public SliceData SliceData;
     }
 

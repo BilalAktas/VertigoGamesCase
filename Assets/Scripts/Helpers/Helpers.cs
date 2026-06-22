@@ -4,6 +4,16 @@ namespace Core
 {
     public class Helpers
     {
+        public static RewardData GetBombData(RewardData[] datas)
+        {
+            foreach (var data in datas)
+            {
+                if (data.RewardType == RewardType.Bomb) return data;
+            }
+
+            return datas[0];
+        }
+        
         public static int GetWeightedIndex(RewardData[] datas, int state)
         {
             var total = 0f;
