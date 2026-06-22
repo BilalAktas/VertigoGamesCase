@@ -122,12 +122,12 @@ namespace Core
 
         private RectTransform GetTarget(RewardItem reward)
         {
-            if (reward.RewardData.RewardType == RewardType.Money)
+            if (reward.RewardData.IsMoney)
             {
-                return reward.RewardData.Name switch
+                return reward.RewardData.RewardType switch
                 {
-                    "Cash" => _cashRectTransform,
-                    "Gold" => _goldRectTransform,
+                    RewardType.Cash => _cashRectTransform,
+                    RewardType.Gold => _goldRectTransform,
                     _ => _bagRectTransform
                 };
             }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d957e410fe3e8f84ba7b239cdd442add, type: 3}
   m_Name: SO_ChestGold
   m_EditorClassIdentifier: 
-  _rewardType: 1
+  _rewardType: 2
   _sprite: {fileID: 21300000, guid: 84cf6b73c0b9e6346a151e87e0112517, type: 3}
   _name: ChestGold
   _placementWeight: 3

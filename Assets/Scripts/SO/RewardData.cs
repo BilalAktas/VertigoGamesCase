@@ -4,7 +4,8 @@ namespace Core
 {
     public enum RewardType
     {
-        Money,
+        Cash,
+        Gold,
         Chest,
         Gun,
         Bomb
@@ -24,5 +25,7 @@ namespace Core
         public Sprite Sprite => _sprite;
         public float PlacementWeight => _placementWeight;
         public float SelectionWeight => _selectionWeight;
+        
+        public bool IsMoney => RewardType == RewardType.Cash ||  RewardType == RewardType.Gold;
     }
 }

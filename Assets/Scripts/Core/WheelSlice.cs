@@ -49,7 +49,8 @@ namespace Core
 
                 switch (RewardData.RewardType)
                 {
-                    case RewardType.Money:
+                    case RewardType.Cash:
+                    case RewardType.Gold:
                         _amount = (int)Random.Range(100 * LevelManager.GetLevel(),
                             (100 * LevelManager.GetLevel() * data.SliceData.MoneyAmountMultiplier));
                         break;

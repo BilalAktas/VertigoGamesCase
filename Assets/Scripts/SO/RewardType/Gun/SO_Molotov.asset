@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d957e410fe3e8f84ba7b239cdd442add, type: 3}
   m_Name: SO_Molotov
   m_EditorClassIdentifier: 
-  _rewardType: 2
-  _name: Molotov
+  _rewardType: 3
   _sprite: {fileID: 21300000, guid: ac85104582e3d0d4daf121cb598d0563, type: 3}
-  _weight: 1
+  _name: Molotov
+  _placementWeight: 1
+  _selectionWeight: 1

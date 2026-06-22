@@ -56,7 +56,7 @@ namespace Core
 
             var sequence = DOTween.Sequence();
             sequence.Append(_rectTransform.DOMove(
-                RewardData.RewardType == RewardType.Money
+                RewardData.IsMoney
                     ? target.position + Vector3.left * 50
                     : target.position + Vector3.left * 125 + Vector3.up * 20, .15f));
             sequence.Append(transform.DOScale(Vector2.zero, .1f));
@@ -64,10 +64,13 @@ namespace Core
             sequence.OnComplete(() =>
             {
                 _collectRewardSound.Play();
-                if (RewardData.RewardType == RewardType.Money)
+                if (RewardData.IsMoney)
                 {
-                    if (RewardData.Name.Equals("Cash")) PlayerEconomyManager.Instance.AddCash(_amount, true);
-                    if (RewardData.Name.Equals("Gold")) PlayerEconomyManager.Instance.AddGold(_amount, true);
+                    switch (RewardData.RewardType)
+                    {
+                        case RewardType.Cash: PlayerEconomyManager.Instance.AddCash(_amount, true); break;
+                        case RewardType.Gold: PlayerEconomyManager.Instance.AddGold(_amount, true); break;
+                    }
                 }
                 else
                 {
