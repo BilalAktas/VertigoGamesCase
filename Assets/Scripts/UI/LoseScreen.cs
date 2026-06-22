@@ -22,6 +22,15 @@ namespace Core
             _goldReviveButton.onClick.AddListener(GoldRevive);
         }
 
+        private void OnValidate()
+        {
+            if(_giveUpButton == null)
+                _giveUpButton = GameObject.Find("ui_button_give_up").GetComponent<Button>();
+            
+            if(_goldReviveButton == null)
+                _goldReviveButton = GameObject.Find("ui_button_gold_revive").GetComponent<Button>();
+        }
+        
         private void OnDestroy()
         {
             EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);

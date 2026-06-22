@@ -1,6 +1,8 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace Core
 {
@@ -25,6 +27,11 @@ namespace Core
         [SerializeField] private AudioSource _spinSound;
         [SerializeField] private AudioSource _spinSliceTickSound;
 
+        private void OnValidate()
+        {
+            if(_spinButton == null)
+                _spinButton = GameObject.Find("ui_button_spin").GetComponent<Button>();
+        }
 
         private void Start()
         {

@@ -30,6 +30,12 @@ namespace Core
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
             EventBus.Subscribe<OnRewardCollectedEvent>(OnRewardCollected);
         }
+        
+        private void OnValidate()
+        {
+            if(_claimButton == null)
+                _claimButton = GameObject.Find("ui_button_claim").GetComponent<Button>();
+        }
 
         private void OnDestroy()
         {
