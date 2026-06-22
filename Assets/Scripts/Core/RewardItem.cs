@@ -23,6 +23,7 @@ namespace Core
 
         public void Set(RewardData data, int amount)
         {
+            transform.localScale = Vector3.one;
             RewardData = data;
             _image.enabled = true;
             _image.preserveAspect = true;

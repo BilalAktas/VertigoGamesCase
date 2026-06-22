@@ -8,7 +8,6 @@ namespace Core
     public class ZoneUIManager : MonoBehaviour
     {
         [SerializeField] private RectTransform _content;
-        [SerializeField] private GameObject _zoneTextPrefab;
         private List<GameObject> _spawnedZoneText = new();
 
         [SerializeField] private Image _zoneBg;
@@ -40,8 +39,10 @@ namespace Core
                 EventBus.Raise(new OnZoneUIAnimationEndedEvent());
             });
 
-            var clone = Instantiate(_zoneTextPrefab, _content.transform);
-            _spawnedZoneText.Add(clone);
+            var text = ObjectPool.Instance.GetFromPool("ui_parent_zone_text");
+            text.transform.SetParent(_content.transform);
+            text.SetActive(true);
+            _spawnedZoneText.Add(text);
 
             SetZoneBg();
         }
@@ -58,8 +59,8 @@ namespace Core
             _content.offsetMin = new Vector2(40f, 0f);
             _content.offsetMax = new Vector2(0f, 0f);
 
-            foreach (var item in _spawnedZoneText.ToArray())
-                Destroy(item);
+            foreach (var item in _spawnedZoneText)
+                ObjectPool.Instance.Deposit(item, "ui_parent_zone_text");
 
             _spawnedZoneText.Clear();
 

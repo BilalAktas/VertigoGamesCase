@@ -2131,7 +2131,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rewardImage: {fileID: 845717302}
-  _rewardItemPrefab: {fileID: 6241764307716455383, guid: 0168ccfbf742d304596b9cfedb3f72e5, type: 3}
   _rewardContentUI: {fileID: 1852266543}
   _rewardSound: {fileID: 503304051}
   _pickUpSound: {fileID: 1078209303}
@@ -2780,6 +2779,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 794875502}
   m_CullTransparentMesh: 1
+--- !u!1 &805795964
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 805795966}
+  - component: {fileID: 805795965}
+  m_Layer: 0
+  m_Name: object_pool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &805795965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 805795964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dbd257bd9dcd874fb1dfb31b6fd6245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pooledObjects:
+  - Name: ui_parent_zone_text
+    Prefab: {fileID: 751148903855455879, guid: 6c93b7e91f076b049a1c8f065a5a0ed0, type: 3}
+    SpawnAmount: 20
+    ExpandAmount: 10
+  - Name: ui_text_inventory_info
+    Prefab: {fileID: 7310344318286727765, guid: 3cb10b72f25f5844194b2ab770e78928, type: 3}
+    SpawnAmount: 20
+    ExpandAmount: 10
+  - Name: ui_parent_reward_item
+    Prefab: {fileID: 6241764307716455383, guid: 0168ccfbf742d304596b9cfedb3f72e5, type: 3}
+    SpawnAmount: 20
+    ExpandAmount: 10
+--- !u!4 &805795966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 805795964}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 951.32043, y: 134.23514, z: -1.7088603}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &808914050
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5317,7 +5373,6 @@ MonoBehaviour:
   _bagRectTransform: {fileID: 2049888007}
   _cashRectTransform: {fileID: 1841551395}
   _goldRectTransform: {fileID: 969015742}
-  _rewardInfoTextPrefab: {fileID: 7310344318286727765, guid: 3cb10b72f25f5844194b2ab770e78928, type: 3}
   _inventoryInfoTextParent: {fileID: 891591383}
 --- !u!111 &1419836595
 Animation:
@@ -6052,7 +6107,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _content: {fileID: 383861312}
-  _zoneTextPrefab: {fileID: 751148903855455879, guid: 6c93b7e91f076b049a1c8f065a5a0ed0, type: 3}
   _zoneBg: {fileID: 1346864963}
   _zoneNormalBg: {fileID: 21300000, guid: 4949f133dce80454bbb5f6abcad5c203, type: 3}
   _zoneSBg: {fileID: 21300000, guid: 6ce45b393f91ad5459bd74f0801f6e4c, type: 3}

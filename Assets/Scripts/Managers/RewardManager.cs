@@ -12,7 +12,6 @@ namespace Core
         private Animation _animation;
 
         private List<RewardItem> _rewardItems = new();
-        [SerializeField] private GameObject _rewardItemPrefab;
         [SerializeField] private RectTransform _rewardContentUI;
 
         private const int MAX_SHOW_AMOUNT = 4;
@@ -101,19 +100,21 @@ namespace Core
                     ind++;
                 }
 
-                var clone = Instantiate(_rewardItemPrefab, _rewardContentUI.transform);
-                var targetRect = clone.GetComponent<RectTransform>();
+                var rewardItem = ObjectPool.Instance.GetFromPool("ui_parent_reward_item");
+                rewardItem.transform.SetParent(_rewardContentUI.transform);
+                rewardItem.SetActive(true);
+                var targetRect = rewardItem.GetComponent<RectTransform>();
 
-                var pos = new Vector2(-30f, 250 + (-DISTANCE_BETWEEN_ITEMS * clone.transform.GetSiblingIndex()));
+                var pos = new Vector2(-30f, 250 + (-DISTANCE_BETWEEN_ITEMS * rewardItem.transform.GetSiblingIndex()));
                 targetRect.anchoredPosition = pos;
 
-                var clonedItem = clone.GetComponent<RewardItem>();
+                var clonedItem = rewardItem.GetComponent<RewardItem>();
                 _rewardItems.Add(clonedItem);
 
 
                 if (_currentItemIndexes.Count < MAX_SHOW_AMOUNT)
                 {
-                    _currentItemIndexes.Add(clone.transform.GetSiblingIndex());
+                    _currentItemIndexes.Add(rewardItem.transform.GetSiblingIndex());
                 }
                 else
                 {
@@ -167,8 +168,8 @@ namespace Core
         private void OnReset()
         {
             _currentItemIndexes.Clear();
-            foreach (var item in _rewardItems.ToArray())
-                Destroy(item.gameObject);
+            foreach (var item in _rewardItems)
+                ObjectPool.Instance.Deposit(item.gameObject, "ui_parent_reward_item");
 
             _rewardItems.Clear();
             _rewardContentUI.anchoredPosition = Vector2.zero;

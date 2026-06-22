@@ -14,7 +14,6 @@ namespace Core
         [SerializeField] private RectTransform _cashRectTransform;
         [SerializeField] private RectTransform _goldRectTransform;
 
-        [SerializeField] private GameObject _rewardInfoTextPrefab;
         [SerializeField] private Transform _inventoryInfoTextParent;
         private Tween _claimButtonTween;
 
@@ -137,13 +136,21 @@ namespace Core
 
         private void OnRewardCollected(OnRewardCollectedEvent data)
         {
-            var clone = Instantiate(_rewardInfoTextPrefab, _inventoryInfoTextParent);
-            var cText = clone.GetComponent<TextMeshProUGUI>();
-            var cRect = clone.GetComponent<RectTransform>();
+            var rewardInfoText = ObjectPool.Instance.GetFromPool("ui_text_inventory_info");
+            rewardInfoText.transform.SetParent(_inventoryInfoTextParent);
+            rewardInfoText.SetActive(true);
+            var cText = rewardInfoText.GetComponent<TextMeshProUGUI>();
+            var cRect = rewardInfoText.GetComponent<RectTransform>();
             cText.text = $"{data.RewardData.Name} x{data.Amount}";
             cRect.anchoredPosition = new Vector2(-275, -75);
             cText.DOFade(0, .4f).SetEase(Ease.Linear);
-            cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() => { Destroy(clone); });
+            cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() =>
+            {
+                cText.DOFade(1, .0001f).OnComplete(() =>
+                {
+                    ObjectPool.Instance.Deposit(rewardInfoText, "ui_text_inventory_info");
+                });
+            });
         }
     }
 }
