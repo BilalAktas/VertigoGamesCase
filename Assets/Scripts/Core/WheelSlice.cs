@@ -13,7 +13,7 @@ namespace Core
         private int _amount;
 
 
-        private void Start()
+        private void OnEnable()
         {
             _sliceImage = transform.GetChild(0).GetComponent<Image>();
             _amountText = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
@@ -24,7 +24,7 @@ namespace Core
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventBus.Unsubscribe<OnSetWheelSlicesEvent>(SetSlice);
             EventBus.Unsubscribe<OnWheelSpinEndedEvent>(OnWheelSpinEnded);

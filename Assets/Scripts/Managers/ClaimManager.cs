@@ -21,7 +21,7 @@ namespace Core
         private Animation _claimButtonAnim;
         private RectTransform _claimButtonRect;
 
-        private void Start()
+        private void OnEnable()
         {
             _claimButtonAnim = _claimButton.GetComponent<Animation>();
             _claimButtonRect = _claimButton.GetComponent<RectTransform>();
@@ -37,7 +37,7 @@ namespace Core
                 _claimButton = GameObject.Find("ui_button_claim").GetComponent<Button>();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             _claimButton.onClick.RemoveAllListeners();
             EventBus.Unsubscribe<OnSpinStartedEvent>(OnSpinStartedEvent);

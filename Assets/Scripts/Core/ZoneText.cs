@@ -8,7 +8,7 @@ namespace Core
         private TextMeshProUGUI _text;
         private int _level;
 
-        private void Start()
+        private void OnEnable()
         {
             _text = GetComponentInChildren<TextMeshProUGUI>();
             GetComponent<RectTransform>().anchoredPosition = new Vector2(transform.GetSiblingIndex() * 70, 0);
@@ -18,7 +18,7 @@ namespace Core
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);

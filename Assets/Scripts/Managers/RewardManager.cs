@@ -22,7 +22,7 @@ namespace Core
         [SerializeField] private AudioSource _rewardSound;
         [SerializeField] private AudioSource _pickUpSound;
 
-        private void Start()
+        private void OnEnable()
         {
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
@@ -30,7 +30,7 @@ namespace Core
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventBus.Unsubscribe<OnShowRewardEvent>(Show);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);

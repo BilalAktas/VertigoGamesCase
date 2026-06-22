@@ -33,11 +33,8 @@ namespace Core
                 _spinButton = GameObject.Find("ui_button_spin").GetComponent<Button>();
         }
 
-        private void Start()
+        private void OnEnable()
         {
-            Application.targetFrameRate = 60;
-
-
             _wheelSlices = GetComponentsInChildren<WheelSlice>();
             ResetWheel(new OnZoneUIAnimationEndedEvent());
             _spinButton.onClick.AddListener(Spin);
@@ -49,7 +46,7 @@ namespace Core
             EventBus.Subscribe<OnGoldReviveEvent>(OnGoldRevive);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             _spinButton.onClick.RemoveAllListeners();
             EventBus.Unsubscribe<OnZoneUIAnimationEndedEvent>(ResetWheel);

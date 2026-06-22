@@ -15,7 +15,7 @@ namespace Core
         [SerializeField] private Animation _notEnoughGoldAnimation;
         [SerializeField] private TextMeshProUGUI _goldPriceToReviveText;
 
-        private void Start()
+        private void OnEnable()
         {
             EventBus.Subscribe<OnBombExplodedEvent>(OnBombExploded);
             _giveUpButton.onClick.AddListener(GiveUp);
@@ -31,7 +31,7 @@ namespace Core
                 _goldReviveButton = GameObject.Find("ui_button_gold_revive").GetComponent<Button>();
         }
         
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventBus.Unsubscribe<OnBombExplodedEvent>(OnBombExploded);
             _giveUpButton.onClick.RemoveAllListeners();

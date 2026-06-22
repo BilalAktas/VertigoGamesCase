@@ -15,7 +15,7 @@ namespace Core
         [SerializeField] private Sprite _zoneNormalBg;
         [SerializeField] private Sprite _zoneSBg;
 
-        private void Start()
+        private void OnEnable()
         {
             EventBus.Subscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
@@ -24,7 +24,7 @@ namespace Core
             SetZoneBg();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             EventBus.Unsubscribe<OnRewardActionEndedEvent>(OnRewardActionEnded);
             EventBus.Unsubscribe<OnClaimEndedEvent>(OnClaimEnded);
