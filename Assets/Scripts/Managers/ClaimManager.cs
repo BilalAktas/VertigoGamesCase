@@ -5,8 +5,41 @@ using UnityEngine.UI;
 
 namespace Core
 {
+    public enum ClaimButtonState
+    {
+        Locked,
+        Active
+    }
+    
     public class ClaimManager : MonoBehaviour
     {
+        private ClaimButtonState _claimButtonState;
+        private ClaimButtonState CurrentClaimButtonState
+        {
+            get => _claimButtonState;
+            set
+            {
+                _claimButtonState = value;
+                ApplyClaimButtonState(_claimButtonState);
+            }
+        }
+
+        private void ApplyClaimButtonState(ClaimButtonState buttonState)
+        {
+            switch (buttonState)
+            {
+                case ClaimButtonState.Locked:
+                    _claimButton.interactable = false;
+                    ClaimButtonAnimReset();
+                    break;
+                    
+                case ClaimButtonState.Active:
+                    _claimButton.interactable = true;
+                    _claimButtonAnim.Play();
+                    break;
+            }
+        }
+        
         [SerializeField] private Button _claimButton;
         [SerializeField] private RectTransform _rewardContent;
 
@@ -28,6 +61,8 @@ namespace Core
             EventBus.Subscribe<OnSpinStartedEvent>(OnSpinStartedEvent);
             EventBus.Subscribe<OnZoneUIAnimationEndedEvent>(OnZoneUIAnimationEnded);
             EventBus.Subscribe<OnRewardCollectedEvent>(OnRewardCollected);
+
+            CurrentClaimButtonState = ClaimButtonState.Locked;
         }
         
         private void OnValidate()
@@ -46,19 +81,14 @@ namespace Core
 
         private void OnZoneUIAnimationEnded(OnZoneUIAnimationEndedEvent data)
         {
-            _claimButton.interactable =
-                LevelManager.GetLevel() % 5 == 0 || LevelManager.GetLevel() % 30 == 0;
-
-            if (_claimButton.interactable)
-                _claimButtonAnim.Play();
-            else
-                ClaimButtonAnimReset();
+            CurrentClaimButtonState = LevelManager.GetLevel() % 5 == 0 || LevelManager.GetLevel() % 30 == 0
+                ? ClaimButtonState.Active
+                : ClaimButtonState.Locked;
         }
 
         private void OnSpinStartedEvent(OnSpinStartedEvent data)
         {
-            _claimButton.interactable = false;
-            ClaimButtonAnimReset();
+            CurrentClaimButtonState = ClaimButtonState.Locked;
         }
 
         private void ClaimButtonAnimReset()
@@ -70,8 +100,9 @@ namespace Core
 
         private void Claim()
         {
-            _claimButton.interactable = false;
-            ClaimButtonAnimReset();
+            if (CurrentClaimButtonState != ClaimButtonState.Active) return;
+            
+            CurrentClaimButtonState = ClaimButtonState.Locked;
 
             EventBus.Raise(new OnClaimStartedEvent());
             var rewards = _rewardContent.GetComponentsInChildren<RewardItem>();

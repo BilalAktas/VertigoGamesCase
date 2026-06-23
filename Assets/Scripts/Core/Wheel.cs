@@ -5,8 +5,45 @@ using Random = UnityEngine.Random;
 
 namespace Core
 {
+    public enum SpinState
+    {
+        Idle,
+        Locked,
+        Disable
+    }
+    
     public class Wheel : MonoBehaviour
     {
+        private SpinState _spinState;
+        private SpinState CurrentSpinState
+        {
+            get => _spinState;
+            set
+            {
+                _spinState = value;
+                ApplySpinState(_spinState);
+            }
+        }
+
+        private void ApplySpinState(SpinState state)
+        {
+            switch (state)
+            {
+                case SpinState.Locked:
+                    _spinButton.interactable = false;
+                    break;
+                    
+                case SpinState.Idle:
+                    _spinButton.gameObject.SetActive(true);
+                    _spinButton.interactable = true;
+                    _spinButton.transform.localScale = Vector2.one;
+                    break;
+                case SpinState.Disable:
+                    _spinButton.gameObject.SetActive(false);
+                    break;
+            }
+        }
+        
         [SerializeField] private SliceData[] _sliceData;
         [SerializeField] private Button _spinButton;
         private WheelSlice[] _wheelSlices;
@@ -45,6 +82,8 @@ namespace Core
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
             EventBus.Subscribe<OnFailGiveUpEvent>(OnFailGiveUp);
             EventBus.Subscribe<OnGoldReviveEvent>(OnGoldRevive);
+
+            CurrentSpinState = SpinState.Idle;
         }
 
         private void OnDisable()
@@ -60,10 +99,11 @@ namespace Core
 
         private void Spin()
         {
+            if (CurrentSpinState != SpinState.Idle) return;
+            
             EventBus.Raise(new OnSpinStartedEvent());
 
-            _spinButton.interactable = false;
-
+            CurrentSpinState = SpinState.Locked;
             _spinSound.Play();
 
             var datas = new RewardData[SLICE_COUNT];
@@ -149,7 +189,7 @@ namespace Core
 
         private void OnSpinButtonCompleteHandler()
         {
-            _spinButton.gameObject.SetActive(false);
+            CurrentSpinState = SpinState.Disable;
             EventBus.Raise(new OnWheelSpinEndedEvent()
             {
                 Index = _rewardIndex
@@ -182,9 +222,7 @@ namespace Core
 
         private void ResetWheelDelayed()
         {
-            _spinButton.gameObject.SetActive(true);
-            _spinButton.interactable = true;
-            _spinButton.transform.localScale = Vector2.one;
+            CurrentSpinState = SpinState.Idle;
 
             var bombIndex = Random.Range(0, 8);
             EventBus.Raise(new OnSetWheelSlicesEvent
@@ -194,7 +232,7 @@ namespace Core
             });
         }
 
-        private void OnClaimStarted(OnClaimStartedEvent data) => _spinButton.interactable = false;
+        private void OnClaimStarted(OnClaimStartedEvent data) => CurrentSpinState = SpinState.Locked;
         private void OnClaimEnded(OnClaimEndedEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
         private void OnFailGiveUp(OnFailGiveUpEvent data) => ResetWheel(new OnZoneUIAnimationEndedEvent());
         private void OnGoldRevive(OnGoldReviveEvent obj) => ResetWheel(new OnZoneUIAnimationEndedEvent());
