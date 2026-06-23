@@ -79,3 +79,7 @@ README.md
 # Layout settings
 *.dwlt
 UserSettings/Layouts/default-2021.dwlt
+
+# Android signing keys
+*.keystore
+*.jks
