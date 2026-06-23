@@ -15,10 +15,10 @@ namespace Core
         [SerializeField] private RectTransform _goldRectTransform;
 
         [SerializeField] private Transform _inventoryInfoTextParent;
-        private Tween _claimButtonTween;
 
         private Animation _claimButtonAnim;
         private RectTransform _claimButtonRect;
+        
 
         private void OnEnable()
         {
@@ -78,7 +78,7 @@ namespace Core
 
             var y = (rewards.Length - 4) > 0 ? (rewards.Length - 4) * 175 : 0;
 
-            var claimSequence = DOTween.Sequence();
+            var claimSequence = DOTween.Sequence().SetLink(_rewardContent.gameObject);
 
             if (_rewardContent.anchoredPosition.y != y)
             {
@@ -90,12 +90,11 @@ namespace Core
 
             for (var j = rewards.Length - 1; j >= 0; j--)
             {
-                var reward = rewards[j];
+                var item = rewards[j];
 
                 claimSequence.AppendCallback(() =>
                 {
-                    var target = GetTarget(reward);
-                    reward.Claim(target);
+                    OnClaimHandler(item);
                 });
 
                 i++;
@@ -110,13 +109,19 @@ namespace Core
             }
 
             claimSequence.AppendInterval(1f);
-            claimSequence.AppendCallback(() =>
-            {
-                LevelManager.ResetLevel();
-                EventBus.Raise(new OnClaimEndedEvent());
-            });
+            claimSequence.AppendCallback(OnClaimSeqCompleteHandler);
+        }
 
-            claimSequence.SetLink(gameObject);
+        private void OnClaimSeqCompleteHandler()
+        {
+            LevelManager.ResetLevel();
+            EventBus.Raise(new OnClaimEndedEvent());
+        }
+
+        private void OnClaimHandler(RewardItem item)
+        {
+            var target = GetTarget(item);
+            item.Claim(target);
         }
 
         private RectTransform GetTarget(RewardItem reward)
@@ -139,18 +144,34 @@ namespace Core
             var rewardInfoText = ObjectPool.Instance.GetFromPool("ui_text_inventory_info");
             rewardInfoText.transform.SetParent(_inventoryInfoTextParent);
             rewardInfoText.SetActive(true);
+
             var cText = rewardInfoText.GetComponent<TextMeshProUGUI>();
             var cRect = rewardInfoText.GetComponent<RectTransform>();
+
             cText.text = $"{data.RewardData.Name} x{data.Amount}";
             cRect.anchoredPosition = new Vector2(-275, -75);
-            cText.DOFade(0, .4f).SetEase(Ease.Linear);
-            cRect.DOAnchorPosY(-5, .3f).SetEase(Ease.Linear).OnComplete(() =>
-            {
-                cText.DOFade(1, .0001f).OnComplete(() =>
+
+            var localText = cText;
+            var localObj = rewardInfoText;
+
+            cText.DOFade(0, .4f)
+                .SetEase(Ease.Linear)
+                .SetLink(localText.gameObject);
+
+            cRect.DOAnchorPosY(-5, .3f)
+                .SetEase(Ease.Linear)
+                .SetLink(localObj)
+                .OnComplete(() => OnInventoryTextMoveEndHandler(localObj, localText));
+        }
+
+        private void OnInventoryTextMoveEndHandler(GameObject obj, TextMeshProUGUI text)
+        {
+            text.DOFade(1, .0001f)
+                .SetLink(obj)
+                .OnComplete(() =>
                 {
-                    ObjectPool.Instance.Deposit(rewardInfoText, "ui_text_inventory_info");
+                    ObjectPool.Instance.Deposit(obj, "ui_text_inventory_info");
                 });
-            });
         }
     }
 }

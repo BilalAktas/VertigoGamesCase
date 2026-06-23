@@ -12,7 +12,8 @@ namespace Core
         private TextMeshProUGUI _amountText;
         private int _amount;
 
-
+        private OnSetWheelSlicesEvent _cachedWheelData;
+        
         private void OnEnable()
         {
             _sliceImage = transform.GetChild(0).GetComponent<Image>();
@@ -32,43 +33,46 @@ namespace Core
             EventBus.Unsubscribe<OnFailGiveUpEvent>(OnFailGiveUp);
         }
 
-        private void OnClaimStarted(OnClaimStartedEvent data) => transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear);
-        private void OnFailGiveUp(OnFailGiveUpEvent data) => transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear);
+        private void OnClaimStarted(OnClaimStartedEvent data) => transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).SetLink(gameObject);
+        private void OnFailGiveUp(OnFailGiveUpEvent data) => transform.DOScale(Vector2.zero, .05f).SetEase(Ease.Linear).SetLink(gameObject);
 
         private void SetSlice(OnSetWheelSlicesEvent data)
         {
-            transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).OnComplete(() =>
+            _cachedWheelData = data;
+            transform.DOScale(Vector2.zero, .15f).SetEase(Ease.Linear).SetLink(gameObject).OnComplete(OnSetSliceCompleteHandler);
+        }
+
+        private void OnSetSliceCompleteHandler()
+        {
+            if (_cachedWheelData.SelectedBombIndex == transform.GetSiblingIndex())
+                RewardData = Helpers.GetBombData(_cachedWheelData.SliceData.Rewards);
+            else
+                RewardData = _cachedWheelData.SliceData.Rewards[Helpers.GetWeightedIndex(_cachedWheelData.SliceData.Rewards, 0)];
+                
+                
+            _sliceImage.sprite = RewardData.Sprite;
+
+            switch (RewardData.RewardType)
             {
-                if (data.SelectedBombIndex == transform.GetSiblingIndex())
-                    RewardData = Helpers.GetBombData(data.SliceData.Rewards);
-                else
-                    RewardData = data.SliceData.Rewards[Helpers.GetWeightedIndex(data.SliceData.Rewards, 0)];
-                
-                
-                _sliceImage.sprite = RewardData.Sprite;
+                case RewardType.Cash:
+                case RewardType.Gold:
+                    _amount = (int)Random.Range(100 * LevelManager.GetLevel(),
+                        (100 * LevelManager.GetLevel() * _cachedWheelData.SliceData.MoneyAmountMultiplier));
+                    break;
 
-                switch (RewardData.RewardType)
-                {
-                    case RewardType.Cash:
-                    case RewardType.Gold:
-                        _amount = (int)Random.Range(100 * LevelManager.GetLevel(),
-                            (100 * LevelManager.GetLevel() * data.SliceData.MoneyAmountMultiplier));
-                        break;
+                case RewardType.Chest:
+                    _amount = Mathf.Min(Random.Range(1, LevelManager.GetLevel()), 10);
+                    break;
 
-                    case RewardType.Chest:
-                        _amount = Mathf.Min(Random.Range(1, LevelManager.GetLevel()), 10);
-                        break;
+                default:
+                    _amount = 1;
+                    break;
+            }
 
-                    default:
-                        _amount = 1;
-                        break;
-                }
+            _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{Helpers.ConvertToKBM(_amount)}";
+            SetColorAlpha(1f);
 
-                _amountText.text = RewardData.RewardType == RewardType.Bomb ? "" : $"x{Helpers.ConvertToKBM(_amount)}";
-                SetColorAlpha(1f);
-
-                transform.DOScale(Vector2.one, .15f).SetEase(Ease.Linear);
-            });
+            transform.DOScale(Vector2.one, .15f).SetEase(Ease.Linear).SetLink(gameObject);
         }
 
         private void SetColorAlpha(float value)

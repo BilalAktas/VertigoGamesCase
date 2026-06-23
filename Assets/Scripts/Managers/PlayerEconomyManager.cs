@@ -27,7 +27,7 @@ namespace Core
             {
                 case true:
                     DOTween.To(() => currentCash, x => _cashText.text = Helpers.ConvertToKBM(x), nCash, 1)
-                        .SetEase(Ease.Linear);
+                        .SetEase(Ease.Linear).SetLink(_cashText.gameObject);
                     break;
                 case false:
                     _cashText.text = Helpers.ConvertToKBM(nCash);
@@ -47,7 +47,7 @@ namespace Core
             {
                 case true:
                     DOTween.To(() => currentGold, x => _goldText.text = Helpers.ConvertToKBM(x), nGold, 1)
-                        .SetEase(Ease.Linear);
+                        .SetEase(Ease.Linear).SetLink(_goldText.gameObject);
                     break;
                 case false:
                     _goldText.text = Helpers.ConvertToKBM(nGold);

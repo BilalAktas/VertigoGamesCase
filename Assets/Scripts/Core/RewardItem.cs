@@ -14,6 +14,8 @@ namespace Core
         private RectTransform _rectTransform;
         [SerializeField] private AudioSource _collectRewardSound;
 
+        private Transform _claimTarget;
+        
         private void OnEnable()
         {
             _image.enabled = false;
@@ -42,7 +44,7 @@ namespace Core
 
         private void PlayScaleAnimation()
         {
-            var sq = DOTween.Sequence();
+            var sq = DOTween.Sequence().SetLink(gameObject);
             sq.Append(_image.transform.DOScale(new Vector3(1.3f, 1.3f, 1.3f), .2f));
             sq.Append(_image.transform.DOScale(1, .1f));
         }
@@ -51,40 +53,44 @@ namespace Core
 
         public void Claim(RectTransform target)
         {
+            _claimTarget = target;
             transform.SetParent(transform.root);
             transform.SetSiblingIndex(5);
             _amountText.text = "";
 
-            var sequence = DOTween.Sequence();
+            var sequence = DOTween.Sequence().SetLink(gameObject);
             sequence.Append(_rectTransform.DOMove(
                 RewardData.IsMoney
                     ? target.position + Vector3.left * 50
-                    : target.position + Vector3.left * 125 + Vector3.up * 20, .15f));
+                    : target.position + Vector3.left * 100 + Vector3.up * 20, .15f));
             sequence.Append(transform.DOScale(Vector2.zero, .1f));
+            
+            sequence.OnComplete(OnClaimSeqCompleteHandler);
+        }
 
-            sequence.OnComplete(() =>
+        private void OnClaimSeqCompleteHandler()
+        {
+            _collectRewardSound.Play();
+            if (RewardData.IsMoney)
             {
-                _collectRewardSound.Play();
-                if (RewardData.IsMoney)
+                switch (RewardData.RewardType)
                 {
-                    switch (RewardData.RewardType)
-                    {
-                        case RewardType.Cash: PlayerEconomyManager.Instance.AddCash(_amount, true); break;
-                        case RewardType.Gold: PlayerEconomyManager.Instance.AddGold(_amount, true); break;
-                    }
+                    case RewardType.Cash: PlayerEconomyManager.Instance.AddCash(_amount, true); break;
+                    case RewardType.Gold: PlayerEconomyManager.Instance.AddGold(_amount, true); break;
                 }
-                else
+            }
+            else
+            {
+                EventBus.Raise(new OnRewardCollectedEvent()
                 {
-                    EventBus.Raise(new OnRewardCollectedEvent()
-                    {
-                        RewardData = RewardData,
-                        Amount = _amount
-                    });
-                }
+                    RewardData = RewardData,
+                    Amount = _amount
+                });
+            }
 
-                target.transform.DOComplete();
-                target.transform.DOPunchScale(new Vector2(.1f, .1f), .25f, 0, 0);
-            });
+              
+            _claimTarget.DOComplete();
+            _claimTarget.DOPunchScale(new Vector2(.1f, .1f), .25f, 0, 0).SetLink(_claimTarget.gameObject);
         }
     }
 }

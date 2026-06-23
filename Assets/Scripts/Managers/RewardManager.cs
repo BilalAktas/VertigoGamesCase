@@ -11,6 +11,8 @@ namespace Core
         [SerializeField] private Image _rewardImage;
         private Animation _animation;
 
+        private RectTransform _rectTransform;
+
         private List<RewardItem> _rewardItems = new();
         [SerializeField] private RectTransform _rewardContentUI;
 
@@ -23,6 +25,7 @@ namespace Core
 
         private void OnEnable()
         {
+            _rectTransform = GetComponent<RectTransform>();
             _animation = GetComponent<Animation>();
             EventBus.Subscribe<OnShowRewardEvent>(Show);
             EventBus.Subscribe<OnClaimEndedEvent>(OnClaimEnded);
@@ -39,103 +42,169 @@ namespace Core
         private void Show(OnShowRewardEvent data)
         {
             //Debug.Log($"reward: {data.RewardData.Name}");
-
-            if (data.RewardData.RewardType == RewardType.Bomb)
-            {
-                EventBus.Raise(new OnBombExplodedEvent());
+            
+            if (CheckBomb(data))
                 return;
-            }
+            
+            PlayRewardFeedback(data);
+            
+            DOVirtual.DelayedCall(1.2f, () => ShowReward(data));
+        }
+        
+        private bool CheckBomb(OnShowRewardEvent data)
+        {
+            if (data.RewardData.RewardType != RewardType.Bomb)
+                return false;
 
+            EventBus.Raise(new OnBombExplodedEvent());
+            return true;
+        }
+        
+        private void PlayRewardFeedback(OnShowRewardEvent data)
+        {
             _rewardSound.Play();
             _rewardImage.sprite = data.RewardData.Sprite;
             _animation.Play();
+        }
+        
+        private void ShowReward(OnShowRewardEvent data)
+        {
+            if (TryUpdateExistingReward(data))
+                return;
 
-            var movingRect = GetComponent<RectTransform>();
-
-            var delay = 0f;
-            var speed = .6f;
-
-            DOVirtual.DelayedCall(1.2f, () =>
+            CreateNewReward(data);
+        }
+        
+        private bool TryUpdateExistingReward(OnShowRewardEvent data)
+        {
+            var i = 0;
+            foreach (var item in _rewardItems)
             {
-                var ind = 0;
-                foreach (var item in _rewardItems)
+                if (item.RewardData != data.RewardData)
                 {
-                    if (item.RewardData == data.RewardData)
-                    {
-                        if (!_currentItemIndexes.Contains(ind))
-                        {
-                            var dir = ind < _currentItemIndexes[0] ? Vector2.up : Vector2.down;
-                            if (dir == Vector2.up)
-                            {
-                                var diff = _currentItemIndexes[0] - ind;
-                                SetCurrentItemIndexes(diff, -1);
-
-                                _rewardContentUI
-                                    .DOAnchorPosY(
-                                        _rewardContentUI.anchoredPosition.y + (-DISTANCE_BETWEEN_ITEMS * diff), speed)
-                                    .SetEase(Ease.Linear);
-                                delay = speed;
-                            }
-                            else
-                            {
-                                var diff = ind - _currentItemIndexes[_currentItemIndexes.Count - 1];
-                                SetCurrentItemIndexes(diff, 1);
-
-                                _rewardContentUI
-                                    .DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff),
-                                        speed).SetEase(Ease.Linear);
-                                delay = speed;
-                            }
-                        }
-
-                        DOVirtual.DelayedCall(delay, () =>
-                        {
-                            var tRect = item.GetComponent<RectTransform>();
-                            RewardImageAnimation(movingRect, tRect, () => { item.Add(data.Amount); });
-                        });
-
-                        return;
-                    }
-
-                    ind++;
+                    i++;
+                    continue;
                 }
 
-                var rewardItem = ObjectPool.Instance.GetFromPool("ui_parent_reward_item");
-                rewardItem.transform.SetParent(_rewardContentUI.transform);
-                rewardItem.SetActive(true);
-                var targetRect = rewardItem.GetComponent<RectTransform>();
+                var delay = ScrollToReward(i, .6f);
 
-                var pos = new Vector2(-30f, 250 + (-DISTANCE_BETWEEN_ITEMS * rewardItem.transform.GetSiblingIndex()));
-                targetRect.anchoredPosition = pos;
-
-                var clonedItem = rewardItem.GetComponent<RewardItem>();
-                _rewardItems.Add(clonedItem);
-
-
-                if (_currentItemIndexes.Count < MAX_SHOW_AMOUNT)
+                DOVirtual.DelayedCall(delay, () =>
                 {
-                    _currentItemIndexes.Add(rewardItem.transform.GetSiblingIndex());
-                }
-                else
-                {
-                    var diff = (_rewardItems.Count - 1) - _currentItemIndexes[_currentItemIndexes.Count - 1];
-                    SetCurrentItemIndexes(diff, 1);
+                    RewardImageAnimationDelayed(data, item);
+                }).SetLink(gameObject);
 
+                return true;
+            }
 
-                    _rewardContentUI
-                        .DOAnchorPosY(_rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff), speed)
-                        .SetEase(Ease.Linear);
-                    delay = speed;
-                }
+            return false;
+        }
 
+        private void RewardImageAnimationDelayed(OnShowRewardEvent data, RewardItem item)
+        {
+            var targetRect = item.GetComponent<RectTransform>();
 
-                DOVirtual.DelayedCall(delay,
-                    () =>
-                    {
-                        RewardImageAnimation(movingRect, targetRect,
-                            () => { clonedItem.Set(data.RewardData, data.Amount); });
-                    });
-            });
+            RewardImageAnimation(
+                targetRect,
+                () => item.Add(data.Amount));
+        }
+        
+        private float ScrollToReward(int index, float speed)
+        {
+            if (_currentItemIndexes.Contains(index))
+                return 0f;
+
+            var currentFirstItem = _currentItemIndexes[0];
+            if (index < currentFirstItem)
+            {
+                var diff = currentFirstItem - index;
+
+                SetCurrentItemIndexes(diff, -1);
+
+                _rewardContentUI
+                    .DOAnchorPosY(
+                        _rewardContentUI.anchoredPosition.y + (-DISTANCE_BETWEEN_ITEMS * diff),
+                        speed)
+                    .SetEase(Ease.Linear).SetLink(_rewardContentUI.gameObject);
+
+                return speed;
+            }
+
+            var downDiff = index - _currentItemIndexes[_currentItemIndexes.Count - 1];
+
+            SetCurrentItemIndexes(downDiff, 1);
+
+            _rewardContentUI
+                .DOAnchorPosY(
+                    _rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * downDiff),
+                    speed)
+                .SetEase(Ease.Linear).SetLink(_rewardContentUI.gameObject);
+
+            return speed;
+        }
+        
+        private void CreateNewReward(OnShowRewardEvent data)
+        {
+            var speed = .6f;
+            var delay = 0f;
+
+            var rewardItem = CreateRewardItem();
+            var targetRect = rewardItem.GetComponent<RectTransform>();
+            var reward = rewardItem.GetComponent<RewardItem>();
+
+            _rewardItems.Add(reward);
+
+            if (_currentItemIndexes.Count < MAX_SHOW_AMOUNT)
+            {
+                _currentItemIndexes.Add(rewardItem.transform.GetSiblingIndex());
+            }
+            else
+            {
+                delay = ScrollForNewReward(speed);
+            }
+
+            DOVirtual.DelayedCall(delay, () =>
+            {
+                ScrollForNewCardDelayedHandler(data, targetRect, reward);
+            }).SetLink(gameObject);
+        }
+
+        private void ScrollForNewCardDelayedHandler(OnShowRewardEvent data, RectTransform targetRect, RewardItem reward)
+        {
+            RewardImageAnimation(
+                targetRect,
+                () => reward.Set(data.RewardData, data.Amount));
+        }
+        
+        private GameObject CreateRewardItem()
+        {
+            var rewardItem = ObjectPool.Instance.GetFromPool("ui_parent_reward_item");
+
+            rewardItem.transform.SetParent(_rewardContentUI.transform);
+            rewardItem.SetActive(true);
+
+            var rect = rewardItem.GetComponent<RectTransform>();
+
+            rect.anchoredPosition = new Vector2(
+                -30f,
+                250 + (-DISTANCE_BETWEEN_ITEMS * rewardItem.transform.GetSiblingIndex()));
+
+            return rewardItem;
+        }
+        
+        private float ScrollForNewReward(float speed)
+        {
+            var diff = (_rewardItems.Count - 1) -
+                       _currentItemIndexes[_currentItemIndexes.Count - 1];
+
+            SetCurrentItemIndexes(diff, 1);
+
+            _rewardContentUI
+                .DOAnchorPosY(
+                    _rewardContentUI.anchoredPosition.y + (DISTANCE_BETWEEN_ITEMS * diff),
+                    speed)
+                .SetEase(Ease.Linear).SetLink(_rewardContentUI.gameObject);
+
+            return speed;
         }
 
         private void SetCurrentItemIndexes(int diff, int value)
@@ -149,17 +218,22 @@ namespace Core
             }
         }
 
-        private void RewardImageAnimation(RectTransform movingRect, RectTransform targetRect, Action afterAction = null)
+        private void RewardImageAnimation(RectTransform targetRect, Action afterAction = null)
         {
             Canvas.ForceUpdateCanvases();
-            movingRect.DOMove(targetRect.position, 0.5f).OnComplete(() =>
+            _rectTransform.DOMove(targetRect.position, .5f).SetLink(gameObject).OnComplete(() =>
             {
-                _pickUpSound.Play();
-                _rewardImage.transform.localScale = Vector2.zero;
-                movingRect.anchoredPosition = Vector2.zero;
-                EventBus.Raise(new OnRewardActionEndedEvent());
-                afterAction?.Invoke();
+                OnRewardImageAnimationCompleteHandler(afterAction);
             });
+        }
+
+        private void OnRewardImageAnimationCompleteHandler(Action afterAction)
+        {
+            _pickUpSound.Play();
+            _rewardImage.transform.localScale = Vector2.zero;
+            _rectTransform.anchoredPosition = Vector2.zero;
+            EventBus.Raise(new OnRewardActionEndedEvent());
+            afterAction?.Invoke();
         }
 
         private void OnClaimEnded(OnClaimEndedEvent data) => OnReset();

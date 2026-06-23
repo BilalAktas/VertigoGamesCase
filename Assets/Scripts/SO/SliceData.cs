@@ -6,7 +6,7 @@ namespace Core
     public class SliceData : ScriptableObject
     {
         [SerializeField] private RewardData[] _rewards;
-        [SerializeField] private float _moneyAmountMultiplier;
+        [SerializeField, Min(.1f)] private float _moneyAmountMultiplier;
         
         public RewardData[] Rewards => _rewards;
         public float MoneyAmountMultiplier => _moneyAmountMultiplier;

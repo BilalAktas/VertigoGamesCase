@@ -34,10 +34,7 @@ namespace Core
         {
             LevelManager.IncreaseLevel();
             var cX = _content.anchoredPosition.x - 70;
-            _content.DOAnchorPosX(cX, .25f).SetEase(Ease.Linear).OnComplete(() =>
-            {
-                EventBus.Raise(new OnZoneUIAnimationEndedEvent());
-            });
+            _content.DOAnchorPosX(cX, .25f).SetEase(Ease.Linear).SetLink(_content.gameObject).OnComplete(OnRewardActionCompleteHandler);
 
             var text = ObjectPool.Instance.GetFromPool("ui_parent_zone_text");
             text.transform.SetParent(_content.transform);
@@ -45,6 +42,11 @@ namespace Core
             _spawnedZoneText.Add(text);
 
             SetZoneBg();
+        }
+
+        private void OnRewardActionCompleteHandler()
+        {
+            EventBus.Raise(new OnZoneUIAnimationEndedEvent());
         }
 
         private void SetZoneBg() => _zoneBg.sprite = LevelManager.GetLevel() % 5 == 0 ? _zoneSBg : _zoneNormalBg;

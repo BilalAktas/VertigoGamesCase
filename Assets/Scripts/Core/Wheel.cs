@@ -1,4 +1,3 @@
-using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +11,7 @@ namespace Core
         [SerializeField] private Button _spinButton;
         private WheelSlice[] _wheelSlices;
 
-        [SerializeField] private float _spinDuration;
+        [SerializeField, Min(.1f)] private float _spinDuration;
         [SerializeField] private Transform _indicator;
 
         private const int SLICE_COUNT = 8;
@@ -22,14 +21,16 @@ namespace Core
         private const float INDICATOR_SOUND_RATE = 32;
         private const float INDICATOR_UP_ANGLE = 50;
 
-        [SerializeField] private float _overShootAngle = .4f;
+        [SerializeField, Range(0, 1)] private float _overShootAngle = .4f;
 
         [SerializeField] private AudioSource _spinSound;
         [SerializeField] private AudioSource _spinSliceTickSound;
 
+        private int _rewardIndex;
+
         private void OnValidate()
         {
-            if(_spinButton == null)
+            if (_spinButton == null)
                 _spinButton = GameObject.Find("ui_button_spin").GetComponent<Button>();
         }
 
@@ -73,12 +74,12 @@ namespace Core
                 i++;
             }
 
-            var rewardIndex = Helpers.GetWeightedIndex(datas, 1);
-            var targetAngle = (FULL_ROTATIONS * 360f) + (rewardIndex * SLICE_ANGLE);
+            _rewardIndex = Helpers.GetWeightedIndex(datas, 1);
+            var targetAngle = (FULL_ROTATIONS * 360f) + (_rewardIndex * SLICE_ANGLE);
 
             var currentAngle = 0f;
             var lastTick = -1;
-            var _previousAngle = 0f;
+            var previousAngle = 0f;
 
             DOTween.To(
                     () => currentAngle,
@@ -96,8 +97,8 @@ namespace Core
                         }
 
 
-                        var delta = angle - _previousAngle;
-                        _previousAngle = angle;
+                        var delta = angle - previousAngle;
+                        previousAngle = angle;
 
                         var angleInTick = angle % SLICE_ANGLE;
                         var indicatorAngle = 0f;
@@ -132,21 +133,26 @@ namespace Core
                     },
                     targetAngle,
                     _spinDuration)
-                .SetEase(Ease.OutBack, _overShootAngle).OnComplete(() =>
-                {
-                    ShowReward(rewardIndex);
-                });
+                .SetEase(Ease.OutBack, _overShootAngle).SetLink(gameObject).OnComplete(OnSpinCompleteHandler);
         }
 
-        private void ShowReward(int rewardIndex)
+        private void OnSpinCompleteHandler()
         {
-            _spinButton.transform.DOScale(Vector2.zero, .02f).SetEase(Ease.Linear).OnComplete(() =>
+            ShowReward();
+        }
+
+        private void ShowReward()
+        {
+            _spinButton.transform.DOScale(Vector2.zero, .02f).SetEase(Ease.Linear).SetLink(_spinButton.gameObject)
+                .OnComplete(OnSpinButtonCompleteHandler);
+        }
+
+        private void OnSpinButtonCompleteHandler()
+        {
+            _spinButton.gameObject.SetActive(false);
+            EventBus.Raise(new OnWheelSpinEndedEvent()
             {
-                _spinButton.gameObject.SetActive(false);
-                EventBus.Raise(new OnWheelSpinEndedEvent()
-                {
-                    Index = rewardIndex
-                });
+                Index = _rewardIndex
             });
         }
 
@@ -171,18 +177,20 @@ namespace Core
 
         private void ResetWheel(OnZoneUIAnimationEndedEvent data)
         {
-            DOVirtual.DelayedCall(.25f, () =>
-            {
-                _spinButton.gameObject.SetActive(true);
-                _spinButton.interactable = true;
-                _spinButton.transform.localScale = Vector2.one;
+            DOVirtual.DelayedCall(.25f, ResetWheelDelayed).SetLink(gameObject);
+        }
 
-                var bombIndex = Random.Range(0, 8);
-                EventBus.Raise(new OnSetWheelSlicesEvent
-                {
-                    SelectedBombIndex = bombIndex,
-                    SliceData = GetSliceData()
-                });
+        private void ResetWheelDelayed()
+        {
+            _spinButton.gameObject.SetActive(true);
+            _spinButton.interactable = true;
+            _spinButton.transform.localScale = Vector2.one;
+
+            var bombIndex = Random.Range(0, 8);
+            EventBus.Raise(new OnSetWheelSlicesEvent
+            {
+                SelectedBombIndex = bombIndex,
+                SliceData = GetSliceData()
             });
         }
 

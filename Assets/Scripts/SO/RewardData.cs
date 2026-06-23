@@ -17,8 +17,8 @@ namespace Core
         [SerializeField] private RewardType _rewardType;
         [SerializeField] private Sprite _sprite;
         [Tooltip("Display name shown in the UI.")] [SerializeField] private string _name;
-        [Tooltip("Weight used when assigning rewards to wheel slots.")] [SerializeField] private float _placementWeight = 1f;
-        [Tooltip("Weight used when selecting this reward from a spin.")] [SerializeField] private float _selectionWeight = 1f;
+        [Tooltip("Weight used when assigning rewards to wheel slots.")] [SerializeField, Min(0)] private float _placementWeight = 1f;
+        [Tooltip("Weight used when selecting this reward from a spin.")] [SerializeField, Min(0)] private float _selectionWeight = 1f;
         
         public RewardType RewardType => _rewardType;
         public string Name => _name;
